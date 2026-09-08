@@ -37,29 +37,53 @@ Le panoramique est vérifié par calcul : sur les cinq stations, l'écart entre 
 position du tracé et celle de la tuile à l'image d'arrivée est de **0,0 px**, et
 la vitesse est continue au raccord entre la rampe et la croisière.
 
-### La révélation du texte — troisième construction
+### La révélation du texte — quatrième construction, sans aucun mouvement
 
-La reprise à l'identique de la source a été rejetée : « trop rapide et violente,
-la manière dont les mots se posent, j'aime pas du tout ». L'échelle d'arrivée a
-donc disparu, et le rééchelonnage de la ligne avec elle. La phrase est posée à
-sa taille finale dès la première image et ne bouge plus ; ce qui s'anime, c'est
-une vague douce qui la parcourt, et les lettres se déposent sur son passage.
+Demande : « type l'animation *exposition* sur After Effects ». Vérification
+faite, **aucun préréglage de texte After Effects ne porte ce nom** — ils vivent
+dans *Animate In*, *Animate Out*, *Blurs*, *Curves and Spins*. Dans l'interface
+française, **« Exposition » est l'effet Exposure**, une correction colorimétrique.
+Ce que ça désigne en pratique, c'est la révélation Exposure + Glow : le texte
+est poussé bien au-delà du blanc, surexposé et diffusé, puis l'exposition
+redescend et les lettres se résolvent depuis la lumière.
 
-Deux Bézier, deux rôles :
+C'est ce qui est implémenté. Plus rien ne translate, ne change d'échelle ni de
+place. Une lettre commence en halo surexposé hors focus et vient au net sur
+place :
 
-| | Courbe | Ce qu'elle règle |
+| Propriété | Trajet |
+|---|---|
+| flou | 18 px → 0 |
+| halo | 46 px vif → éteint |
+| opacité | 0 → 1, menée 1,5× plus vite pour qu'aucune lettre ne soit une tache grise |
+
+Les trois sont pilotées par **une seule valeur de progression sur une seule
+courbe**. C'est le point : la toute première version empilait quatre propriétés
+par mot sur quatre décalages différents contre une ligne qui glissait — ça
+saccadait. Ce ne sont pas les propriétés le problème, ce sont les temporalités
+indépendantes.
+
+| | Courbe | Rôle |
 |---|---|---|
-| `READING` | `cubic-bezier(0.42, 0.02, 0.24, 1)` | la vitesse de la vague le long de la phrase : 0,03 lettre/image au départ, 1,16 au plus fort, puis un long freinage |
-| `SETTLE` | `cubic-bezier(0.16, 0.62, 0.22, 1)` | la façon dont une lettre vient au repos — environ 10 images |
+| `READING` | `cubic-bezier(0.35, 0.12, 0.3, 0.9)` | vitesse de la vague le long de la phrase |
+| `SETTLE` | `cubic-bezier(0.45, 0, 0.22, 1)` | comment une lettre sort de la lumière |
 
-La vague est volontairement large (six lettres en mouvement à la fois) : c'est
-ce qui la fait lire comme un seul geste continu plutôt que comme soixante
-petites arrivées. La phrase est complète à 1,7 s et tenue 1,7 s de plus.
+**Deux réglages ont dû être corrigés à la mesure.** `SETTLE` valait d'abord
+`(0.12, 0.58, 0.18, 1)` : elle atteignait les trois quarts en un huitième de sa
+fenêtre — un claquement, pas un fondu. Et `READING` était trop marquée : elle
+culminait à **3,3× sa propre moyenne**, et c'est ce pic qui comprimait le milieu
+de la phrase. Aplatie à 2,0×, une lettre met désormais **8 à 16 images** à se
+résoudre où qu'elle soit dans la ligne.
 
-Historique de ce beat, parce que chaque version avait sa raison : onze entrées
-par mot (opacité + échelle + flou + décalage) contre une ligne qui glissait déjà
-— ça saccadait ; puis un défilé à vitesse constante — fluide mais mécanique ;
-puis le mécanisme de la source — fidèle mais brutal ; puis ceci.
+La vague est large de **20 lettres**, soit un tiers de la phrase : le halo se lit
+comme une seule bande de lumière qui balaie la ligne, et non comme soixante
+scintillements. Phrase complète à 2,3 s, tenue 1,6 s de plus.
+
+Historique du beat, parce que chaque version a échoué autrement : onze entrées
+par mot sur quatre propriétés désynchronisées — saccadé ; défilé à vitesse
+constante — fluide mais mécanique ; le mécanisme de la source, mot arrivant à
+3,1× sa taille — fidèle mais brutal ; lettres qui montent de 16 px — encore trop
+sec ; puis ceci, où rien ne bouge.
 
 ### Deux écarts assumés, et pourquoi
 

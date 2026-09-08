@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, W, H, SANS} from '../theme';
+import {C, H, SANS} from '../theme';
 import {Ink} from '../components/Grounds';
 import {prog} from '../../ease';
 import {cubicBezier} from '../../bezier';
@@ -8,33 +8,35 @@ import {cubicBezier} from '../../bezier';
 /**
  * Beat 4 — the turn, 7.8 -> 11.4 s.
  *
- * Third construction for this beat, and the reason for each is worth keeping.
+ * Fourth construction, and this one drops movement entirely.
  *
- *  - It began as eleven per-word entrances (opacity + scale + blur + offset)
- *    firing against a line that was itself sliding: four animations per word,
- *    none of them continuous. That juddered.
- *  - It then became a constant-speed slide behind a soft window. Smooth, but
- *    mechanical.
- *  - It was then rebuilt from the reference film, where each word lands at about
- *    three times its size while the whole line rescales. Faithful, but the note
- *    on it was plain: "trop rapide et violente ... la manière dont les mots se
- *    posent, j'aime pas du tout".
+ * The brief was "type l'animation exposition sur After Effects". There is no
+ * text preset by that name — AE's text presets live in Animate In, Animate Out,
+ * Blurs, Curves and Spins and so on. In the FRENCH interface "Exposition" is the
+ * Exposure effect, a colour correction. What that names in practice is the
+ * Exposure-plus-Glow reveal: type is pushed well past white, blown out and
+ * bloomed, and the exposure is then brought back down so the letters resolve out
+ * of the light rather than arriving from somewhere.
  *
- * So the arrival scale is gone, and so is the rescaling of the line. The
- * sentence is set at its final size from the first frame and never moves. What
- * animates is a soft wave travelling along it, and the letters settle as it
- * passes — nothing lands on top of anything, nothing changes size.
+ * So nothing here translates, scales or reflows. A letter begins as a soft
+ * over-exposed bloom and comes into focus in place:
  *
- * Two Beziers, doing two different jobs:
+ *   blur        18px -> 0      the letter resolves
+ *   bloom       wide, bright -> gone   the over-exposure falls away
+ *   opacity     0 -> 1         carried faster than the rest so it is never grey
  *
- *  1. READING is the speed of the wave along the sentence. It eases in and out,
- *    so the reveal opens gently, flows through the middle, and arrives at the
- *    full stop without braking hard.
- *  2. SETTLE is how one letter lands once the wave reaches it — a long tail, so
- *    it comes to rest rather than snapping into place.
+ * All three are driven by ONE progress value on ONE curve. That matters: the
+ * first version of this beat stacked four properties per word on four different
+ * staggers against a line that was itself sliding, and it juddered. Properties
+ * are not the problem; independent timings are.
  *
- * The wave is deliberately wide (SOFT letters are in motion at once), which is
- * what makes it read as one continuous gesture instead of sixty small ones.
+ * Two Beziers, two jobs:
+ *
+ *  1. READING — the speed of the wave along the sentence: it opens gently,
+ *     flows, and arrives at the full stop without braking hard.
+ *  2. SETTLE — how one letter comes out of the bloom, with a long tail so it
+ *     finishes slowly. This is where the "satisfying" lives: the last 20 % of
+ *     the resolve takes as long as the first 60 %.
  */
 
 const FROM = 466;
@@ -42,15 +44,24 @@ const TO = 684;
 
 /** The wave crosses the whole sentence in this many frames — 2.5 s. */
 const REVEAL = 150;
-/** How many letters are mid-landing at any moment. */
-const SOFT = 6;
-/** How far a letter drifts up into place. Small on purpose. */
-const RISE = 16;
+/** Letters resolving at once — a third of the sentence, so the bloom reads as
+ *  one band of light sweeping the line rather than sixty separate flickers. */
+const SOFT = 20;
 
-/** The speed of the wave along the line. */
-const READING = cubicBezier(0.42, 0.02, 0.24, 1);
-/** How a single letter comes to rest. */
-const SETTLE = cubicBezier(0.16, 0.62, 0.22, 1);
+/** Peak blur on a letter, in px, before it resolves. */
+const BLUR = 18;
+/** Peak bloom radius, in px. */
+const BLOOM = 46;
+
+/**
+ * The speed of the wave along the line. Deliberately FLAT for a Bezier: a
+ * strongly eased curve peaks at 3.3x its own average, and that peak is what
+ * compressed the middle of the sentence into a snap. This one peaks at 2.0x, so
+ * a letter takes 8 to 16 frames to resolve wherever it sits in the line.
+ */
+const READING = cubicBezier(0.35, 0.12, 0.3, 0.9);
+/** How a single letter comes out of the light — long tail on purpose. */
+const SETTLE = cubicBezier(0.45, 0, 0.22, 1);
 
 const ROWS = [
   'Parce que gérer une location courte durée,',
@@ -59,11 +70,6 @@ const ROWS = [
 const ACCENT_ROW = 1;
 const TOTAL = ROWS[0].length + ROWS[1].length;
 
-/**
- * Fixed size: the line no longer rescales as it fills, so this is simply what
- * the sentence reads at. 72 px puts the longer row at 79 % of frame width,
- * which is the proportion measured on the reference film's own held line.
- */
 const FONT = 72;
 
 export const Metier: React.FC<{frame: number}> = ({frame}) => {
@@ -91,23 +97,33 @@ export const Metier: React.FC<{frame: number}> = ({frame}) => {
         }}
       >
         {ROWS.map((row, ri) => {
+          const accent = ri === ACCENT_ROW;
           const before = ri === 0 ? 0 : ROWS[0].length;
           return (
             <div key={ri} style={{display: 'flex', whiteSpace: 'pre', height: '1.2em'}}>
               {[...row].map((ch, ci) => {
                 const i = before + ci;
                 const p = SETTLE(Math.max(0, Math.min(1, (head - i) / SOFT)));
+                const done = p > 0.999;
+                // opacity leads the resolve so a letter is never a grey smudge
+                const o = Math.min(1, p * 1.5);
+                const glow = accent ? '146,196,255' : '255,255,255';
                 return (
                   <span
                     key={ci}
                     style={{
                       display: 'inline-block',
-                      opacity: p,
-                      transform: `translateY(${(1 - p) * RISE}px)`,
-                      color: ri === ACCENT_ROW ? C.blue350 : C.inkDark,
+                      opacity: o,
+                      color: accent ? C.blue350 : C.inkDark,
+                      // the whole reveal: out of focus and over-exposed, into place
+                      filter: done ? undefined : `blur(${(1 - p) * BLUR}px)`,
+                      textShadow: done
+                        ? undefined
+                        : `0 0 ${(1 - p) * BLOOM}px rgba(${glow},${(1 - p) * 0.95}),` +
+                          ` 0 0 ${(1 - p) * BLOOM * 2.2}px rgba(${glow},${(1 - p) * 0.5})`,
                     }}
                   >
-                    {ch === ' ' ? ' ' : ch}
+                    {ch}
                   </span>
                 );
               })}
