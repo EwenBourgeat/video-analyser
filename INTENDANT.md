@@ -1,8 +1,8 @@
 # L'Intendant — film de conciergerie
 
 Animation de 42 s pour **L'Intendant**, conciergerie de location courte durée à
-Toulouse. Version révisée d'après `Prompt.pdf`, `Prompt2.pdf`, `Prompt3.pdf`
-puis `prompt4.pdf`.
+Toulouse. Révisée d'après `Prompt.pdf`, `Prompt2.pdf`, `Prompt3.pdf`, `prompt4.pdf`,
+puis une nouvelle lecture image par image de la vidéo de référence.
 
 ## Livrables
 
@@ -15,6 +15,52 @@ puis `prompt4.pdf`.
 open repro/out/intendant_16x9.mp4
 cd repro && npx remotion studio      # composition "Intendant"
 ```
+
+## Cinquième passage — nouvelle lecture image par image de la source
+
+Les 20 premières secondes de la vidéo TikTok ont été redécodées à la frame
+(600 frames à 30 fps, bandeau 16:9 aligné) et mesurées. Ce qui en est sorti :
+
+| Mesure | Valeur trouvée | Ce que ça a changé |
+|---|---|---|
+| Vitesse du balayage | **375 °/s** dans le sens horaire, un tour en 0,96 s | La boussole tournait à 151 °/s |
+| Extinction des points | **chaque point s'éteint quand la tête du balayage le croise** — un seul tour, aucun survivant | Les points s'effaçaient sur une minuterie décalée sans rapport avec le balayage : ça se lisait comme un fondu, pas comme un scan |
+| Nombre de points | 11 visibles au pic dans un plan bien plus serré | Porté de 12 à **24** |
+| Forme du balayage | secteur à **traîne angulaire** (vif en tête, éteint ~104° en arrière) | Reconstruit en éventail de 14 tranches — SVG n'a pas de dégradé conique |
+| Raccord boussole → horloge | **match cut** : le cercle pâle est remplacé en une image par le cadran bleu, même taille, même centre | Confirme la construction déjà en place |
+| Recul horloge → navigateur | rayon 665 → 430 px en **40 images**, ajusté à **`cubic-bezier(0.276, 1, 0.776, 0.97)`**, RMS 0,006 sur 16 points | Remplace une courbe générique sur 96 images — c'est ce qui rendait ce raccord sec |
+| Révélation du texte | un mot toutes les **3 images**, chacun arrivant à **~3,1×** sa taille et se réduisant en 3,5 images, la ligne entière rééchelonnée à largeur constante | Le défilé à vitesse constante est remplacé par ce mécanisme |
+| Courbe sinusoïdale | l'icône apparaît **9 images avant** que le tracé l'atteigne (le libellé suit 2 images après, le chiffre fantôme précède de 4) | L'icône et le tracé arrivaient ensemble |
+| Point de vue de la sinusoïde | tuile ~190 px, entraxe ~1020 px, amplitude 200 px, panoramique **24,5 px/image** | Ma version était **2,7× trop reculée** (tuile 116 px, entraxe 370 px) |
+
+Le panoramique est vérifié par calcul : sur les cinq stations, l'écart entre la
+position du tracé et celle de la tuile à l'image d'arrivée est de **0,0 px**, et
+la vitesse est continue au raccord entre la rampe et la croisière.
+
+### Deux écarts assumés, et pourquoi
+
+**1. La phrase ne défile pas hors champ.** Dans la source, la ligne reste sur un
+seul rang : une fois pleine, les premiers mots sortent par la gauche — à l'image
+214 « Parce que ça ne sert » a disparu, il ne reste que la fin, à 77 px de haut.
+C'est ce qui lui permet de garder une grosse typo. Mais ça veut aussi dire que la
+phrase entière n'est jamais lisible d'un coup. Vu le nombre de fois où ce projet
+est revenu sur « on n'a pas le temps de lire », la ligne est ici écrite sur
+**deux rangs fixes** : rien ne sort du cadre, la taille mesurée de 77 px est
+conservée, et comme la coupure est écrite à la main plutôt que calculée, aucun
+mot ne saute de ligne pendant la révélation.
+
+**2. Les angles exacts des aiguilles n'ont pas pu être relevés.** Trois méthodes
+ont été tentées — histogramme angulaire pondéré par le rayon, suivi par
+continuité entre images, levée d'ambiguïté par la portée de chaque rayon — et
+les trois ont échoué, pour des raisons identifiables : le cadran est coupé par le
+cadre, les aiguilles sont filées par le mouvement, et un segment vu par un
+détecteur symétrique a deux extrémités indiscernables. Ce qui est établi
+visuellement, en revanche : trois aiguilles, rotation continue et rapide, aucun
+à-coup de tic-tac. L'horloge est donc pilotée par **une seule grandeur** — le
+temps horloge écoulé — dont les trois angles découlent aux vrais rapports
+(720 : 60 : 1). C'est cette cohérence qui fait « vraie horloge » ; auparavant le
+trotteur tournait à 2,1× l'aiguille des minutes au lieu de 60×, ce qui est
+précisément ce qui sonnait faux.
 
 ## prompt4.pdf — quatrième passage
 
