@@ -1,0 +1,24 @@
+# Dépendances
+node_modules/
+.venv/
+
+# Sorties de rendu : régénérables en une commande, et lourdes (57 Mo).
+# Les garder en Git alourdirait l'historique à chaque re-rendu.
+repro/out/
+
+# Contenu tiers — NE PAS VERSIONNER.
+# ref/ contient la vidéo TikTok source et ses frames extraites ;
+# plates/ et avatars/ sont des pixels prélevés directement dedans.
+# Tout cela se régénère depuis la source (voir METHODE.md) et n'a pas
+# à être redistribué.
+ref/
+repro/public/plates/
+repro/public/avatars/
+
+# Briefs client (PDF de captures, 43 Mo). Leur contenu est déjà retranscrit
+# dans les tableaux de révision d'INTENDANT.md.
+Prompt*.pdf
+prompt*.pdf
+
+# macOS
+.DS_Store
