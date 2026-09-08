@@ -37,6 +37,30 @@ Le panoramique est vérifié par calcul : sur les cinq stations, l'écart entre 
 position du tracé et celle de la tuile à l'image d'arrivée est de **0,0 px**, et
 la vitesse est continue au raccord entre la rampe et la croisière.
 
+### La révélation du texte — troisième construction
+
+La reprise à l'identique de la source a été rejetée : « trop rapide et violente,
+la manière dont les mots se posent, j'aime pas du tout ». L'échelle d'arrivée a
+donc disparu, et le rééchelonnage de la ligne avec elle. La phrase est posée à
+sa taille finale dès la première image et ne bouge plus ; ce qui s'anime, c'est
+une vague douce qui la parcourt, et les lettres se déposent sur son passage.
+
+Deux Bézier, deux rôles :
+
+| | Courbe | Ce qu'elle règle |
+|---|---|---|
+| `READING` | `cubic-bezier(0.42, 0.02, 0.24, 1)` | la vitesse de la vague le long de la phrase : 0,03 lettre/image au départ, 1,16 au plus fort, puis un long freinage |
+| `SETTLE` | `cubic-bezier(0.16, 0.62, 0.22, 1)` | la façon dont une lettre vient au repos — environ 10 images |
+
+La vague est volontairement large (six lettres en mouvement à la fois) : c'est
+ce qui la fait lire comme un seul geste continu plutôt que comme soixante
+petites arrivées. La phrase est complète à 1,7 s et tenue 1,7 s de plus.
+
+Historique de ce beat, parce que chaque version avait sa raison : onze entrées
+par mot (opacité + échelle + flou + décalage) contre une ligne qui glissait déjà
+— ça saccadait ; puis un défilé à vitesse constante — fluide mais mécanique ;
+puis le mécanisme de la source — fidèle mais brutal ; puis ceci.
+
 ### Deux écarts assumés, et pourquoi
 
 **1. La phrase ne défile pas hors champ.** Dans la source, la ligne reste sur un
