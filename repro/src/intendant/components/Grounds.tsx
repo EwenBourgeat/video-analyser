@@ -20,16 +20,16 @@ export const Ink: React.FC<{glow?: number}> = ({glow = 1}) => (
   <AbsoluteFill style={{background: C.paperDark}}>
     <AbsoluteFill
       style={{
-        background: `radial-gradient(118% 80% at 50% 116%, rgba(198,58,32,${
+        background: `radial-gradient(118% 80% at 50% 116%, rgba(170,89,60,${
           0.52 * glow
-        }) 0%, rgba(110,20,12,${0.30 * glow}) 34%, rgba(64,1,6,0) 70%)`,
+        }) 0%, rgba(91,49,37,${0.30 * glow}) 34%, rgba(45,31,26,0) 70%)`,
       }}
     />
     <AbsoluteFill
       style={{
-        background: `radial-gradient(62% 46% at 7% 32%, rgba(128,30,16,${
+        background: `radial-gradient(62% 46% at 7% 32%, rgba(106,61,41,${
           0.24 * glow
-        }) 0%, rgba(64,1,6,0) 72%)`,
+        }) 0%, rgba(45,31,26,0) 72%)`,
       }}
     />
   </AbsoluteFill>

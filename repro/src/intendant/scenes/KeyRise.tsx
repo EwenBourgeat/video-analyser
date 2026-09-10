@@ -43,7 +43,7 @@ export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
             <stop offset="100%" stopColor={C.blue600} />
           </linearGradient>
           <filter id="keyShadow" x="-40%" y="-40%" width="180%" height="180%">
-            <feDropShadow dx="0" dy="26" stdDeviation="26" floodColor="#1A0002" floodOpacity="0.5" />
+            <feDropShadow dx="0" dy="26" stdDeviation="26" floodColor="#170F0C" floodOpacity="0.5" />
           </filter>
         </defs>
 

@@ -18,32 +18,41 @@ puis une nouvelle lecture image par image de la vidéo de référence.
 
 ### La palette rouge
 
-Références client : **`#941101`** (primaire) et **`#400106`** (fond sombre).
+Référence client : **`#941101`**, gardée telle quelle comme **primaire**.
 
-`#941101` est en `hsl(7°, 99 %, 29 %)` — nettement plus sombre que le bleu qu'il
-remplace, qui était à 51 % de luminosité. Une bascule de teinte à luminosité
-constante aurait donc assombri tout le film. L'échelle est reconstruite en teinte
-7–16°, avec les luminosités ajustées **par rôle** :
+**Le fond sombre n'est PAS `#400106`.** Cette valeur y a d'abord été posée telle
+quelle, et le résultat était agressif. Mesuré sur le rendu :
+
+| Fond moyen | Saturation |
+|---|---|
+| Bleu (référence) | **29 %** |
+| Rouge, première version | **81 %** |
+
+La cause était structurelle et non esthétique : `#400106` est une couleur de
+**marque**, `hsl(355°, 97 %, 13 %)`, placée dans un rôle de **fond** — alors que
+le fond bleu était `hsl(207°, 24 %, 9 %)`, un quasi-neutre avec une simple
+dominante. La teinte avait été reprise sans la **discipline de saturation** qui
+allait avec. Sur une grande surface, du rouge à 97 % se lit comme une alarme.
+
+Deux leviers ont corrigé ça :
+
+- **teinte de 355° → 16°** — du rouge sang à la terre cuite, nettement plus
+  supportable en aplat ;
+- **saturation de 97 % → 26 %** sur le fond, lueurs désaturées en proportion.
 
 | Clé | Valeur | Rôle |
 |---|---|---|
-| `blue600` | **#941101** | la référence, telle quelle |
-| `blue500` | #AB1D07 | |
-| `blue450` | #BE290E | |
+| `blue600` | **#941101** | la référence, en accent seulement |
 | `blue400` | #D13415 | anneau du cadran, dégradés |
-| `blue350` | **#EA907B** | accent sur fond sombre |
-| `blue300` → `blueWash` | #EEA796 → #FDF5F2 | teintes claires |
-| `paperDark` | **#400106** | le fond sombre |
+| `blue350` | **#EC9B89** | texte d'accent sur fond sombre |
+| `paperDark` | **#2D1F1A** | le fond — `hsl(16°, 26 %, 14 %)` |
 
-**Le seul point qui a demandé un calcul :** `blue350` porte le texte d'accent sur
-fond sombre (« un vrai métier », « plus rien », « AVIS GOOGLE »). La valeur
-dérivée naïvement donnait un contraste WCAG de **4,94** contre les **7,18** de
-l'ancien accent bleu — le texte aurait été sensiblement moins lisible. La
-luminosité a été cherchée pour égaler ce contraste : `#EA907B` donne **7,16**.
+**Résultat mesuré : 27 %** de saturation moyenne sur la scène de texte, contre
+les 29 % du bleu. Saturation divisée par 3.
 
-Les lueurs du fond sombre deviennent des braises (`rgba(198,58,32)` au cœur), les
-ombres portées passent de froides à chaudes, et les gris de l'encre sont
-réchauffés.
+`blue350` porte le texte d'accent sur fond sombre : sur le nouveau fond il
+tombait à 6,63 de contraste, il a été remonté à **7,27** — l'ancien accent bleu
+était à 7,18.
 
 ### Non touché, volontairement
 
@@ -53,6 +62,11 @@ réchauffés.
 - Le **vert de validation** (`#16A34A`) : couleur sémantique, pas de thème. Sur
   un film rouge ce complémentaire ressort fortement — à arbitrer si l'on préfère
   une coche neutre ou rouge foncé.
+- **Le disque de transition agenda → « Nous gérons »** noie le cadre en `#941101`
+  pendant environ une demi-seconde. C'est le mécanisme du raccord — le bouton
+  devient la pastille — donc il doit être à la couleur de marque pour
+  fonctionner. C'est le seul aplat rouge qui subsiste ; l'adoucir affaiblirait
+  l'effet.
 
 ### Pourquoi les clés s'appellent encore `blue*`
 

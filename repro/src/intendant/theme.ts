@@ -7,10 +7,22 @@
  * sans conflit sur les quinze fichiers de scènes. Les renommer coûterait une
  * cinquantaine d'éditions et rendrait tout rebase pénible.
  *
- * Références client : #941101 (primaire) et #400106 (fond sombre). Le reste de
- * l'échelle en est dérivé en teinte 7-16°, et `blue350` a été calé à un
- * contraste de 7,16 sur le fond sombre pour égaler exactement le 7,18 qu'avait
- * l'ancien accent bleu — c'est cette teinte qui porte le texte d'accent.
+ * Référence client : #941101, gardée telle quelle comme PRIMAIRE.
+ *
+ * LE FOND SOMBRE N'EST PAS #400106. Cette valeur a d'abord été posée telle
+ * quelle, et le résultat était agressif : mesuré sur le rendu, le fond moyen
+ * ressortait à 81 % de saturation, contre 29 % pour la version bleue. La cause
+ * était structurelle — #400106 est une couleur de MARQUE, hsl(355, 97 %, 13 %),
+ * placée dans un rôle de FOND, alors que le fond bleu était hsl(207, 24 %, 9 %) :
+ * un quasi-neutre avec une simple dominante.
+ *
+ * Le fond est donc un terre cuite très sombre et peu saturé, hsl(16, 26 %, 14 %).
+ * La teinte est décalée de 355° vers 16° : le rouge sang est la teinte la plus
+ * agressive à grande surface, la terre cuite se supporte beaucoup mieux. Le rouge
+ * saturé ne sert plus que d'accent.
+ *
+ * `blue350` porte le texte d'accent sur ce fond et a été calé à un contraste de
+ * 7,27, pour égaler le 7,18 qu'avait l'ancien accent bleu.
  *
  * Palette révisée : le brique/terracotta a été remplacé par le bleu, à la
  * demande du client (« un beau bleu moderne se rapprochant de l'autre
@@ -23,7 +35,7 @@ export const C = {
   // grounds
   paper: '#FFFFFF',
   paperSoft: '#FDF7F5',
-  paperDark: '#400106',
+  paperDark: '#2D1F1A',
 
   // ink
   ink: '#120A09',
@@ -36,15 +48,15 @@ export const C = {
   // rules
   line: '#F0E2DD',
   lineStrong: '#DFC7C0',
-  lineDark: '#5A1A14',
-  lineStrongDark: '#7A2A20',
+  lineDark: '#46322B',
+  lineStrongDark: '#65483E',
 
   // the red palette of this branch — see the note at the top of the file
   blue600: '#941101',
   blue500: '#AB1D07',
   blue450: '#BE290E',
   blue400: '#D13415',
-  blue350: '#EA907B',
+  blue350: '#EC9B89',
   blue300: '#EEA796',
   blue250: '#F5BDAD',
   blue150: '#FADBD1',

@@ -238,7 +238,7 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: `0 0 ${64 * e}px ${16 * e}px rgba(234,144,123,0.38), 0 16px 38px rgba(0,0,0,0.45)`,
+                boxShadow: `0 0 ${64 * e}px ${16 * e}px rgba(236,155,137,0.38), 0 16px 38px rgba(0,0,0,0.45)`,
                 opacity: e,
                 transform: `scale(${0.5 + 0.5 * e})`,
               }}
