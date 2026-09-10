@@ -1,6 +1,6 @@
 # L'Intendant — film de conciergerie
 
-Animation de 49,6 s pour **L'Intendant**, conciergerie de location courte durée à
+Animation de 42,3 s pour **L'Intendant**, conciergerie de location courte durée à
 Toulouse. Révisée d'après `Prompt.pdf`, `Prompt2.pdf`, `Prompt3.pdf`, `prompt4.pdf`,
 puis une nouvelle lecture image par image de la vidéo de référence.
 
@@ -8,13 +8,122 @@ puis une nouvelle lecture image par image de la vidéo de référence.
 
 | Fichier | Format |
 |---|---|
-| **`repro/out/intendant_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 49,6 s |
+| **`repro/out/intendant_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 42,3 s |
 | `repro/out/intendant_9x16.mp4` | 1080 × 1920 @ 60 fps |
 
 ```bash
 open repro/out/intendant_16x9.mp4
 cd repro && npx remotion studio      # composition "Intendant"
 ```
+
+## Huitième passage — du rythme, et un film qui se déplace au lieu d'additionner des scènes
+
+Demande de principe : « je ne veux pas une addition de scènes, je veux qu'il y ait
+le sentiment qu'on se déplace sur un grand fond ».
+
+### Les avis : 10 s → 4 s, caméra jamais nulle
+
+Le maintien de 3,47 s, la construction sur place (volet, contenu, étoiles) et la
+rampe d'accélération sont supprimés. Les cartes ne sont plus animées du tout :
+ce sont des objets posés dans le monde à `R0 + i × PITCH`, et c'est la caméra
+qui les croise. `Reviews.tsx` a perdu la majorité de son code.
+
+**Le coup de fouet.** La caméra ne ralentit plus à la fin du travelling : elle
+**accélère**, de 12,3 à 34 px/image, traverse le vide à cette vitesse, puis
+décélère jusqu'à 8 sur les avis.
+
+Ce n'est pas un effet de style, c'est de l'arithmétique. Une rangée qui entre par
+la droite doit parcourir **une largeur de cadre entière — 1920 px** — avant que
+trois cartes soient visibles :
+
+| Vitesse | Temps pour remplir le cadre |
+|---|---|
+| 8 px/image | **4,00 s** — soit la durée entière du beat |
+| 20 px/image | 1,60 s |
+| **34 px/image** | **0,94 s** |
+
+À 8 px/image le cadre ne se remplissait qu'à sa dernière image — un défaut que
+les mesures de raccord ne pouvaient pas révéler, seule la planche de contrôle
+l'a montré. La vitesse ne coûte rien pendant la traversée du vide puisqu'il n'y a
+rien à regarder, et 34 px/image ne déplace une carte de 560 px que de **6 % de sa
+largeur par image** : ni stroboscopie ni bavure. C'est le *whip pan* que Ikea et
+Nike utilisent comme raccord.
+
+Résultat : **cadre plein à +1,10 s** au lieu de +4,00 s, 3350 px de trajet sur le
+beat, 5,4 cartes défilent. Une fois posée à 8 px/image, la rangée de douze cartes
+boucle en 15,6 s, toujours dans la fourchette 15–25 s.
+
+### « vous ne gérez plus rien » : −0,5 s
+
+150 → 120 images. Décalages des tables comprimés ×0,8 — en ne touchant que le
+premier élément de chaque paire `[image, valeur]`.
+
+### Diffusion → agenda : le zoom qui traverse
+
+**Cause de la cassure, mesurée :** le losange se figeait à `x = 518` et y restait
+**112 images** avant de disparaître net. Cette immobilité comptait autant que la
+coupe dans l'effet « addition de scènes ». Le beat perd 40 images, l'attente
+tombe à 72.
+
+Sur les 44 dernières images, une carte « Nouvelle réservation » cesse de monter,
+se cale au centre et grandit jusqu'à ce que sa plaque blanche noie le cadre. La
+coupe se cache dans ce blanc, et l'agenda en ressort en continuant le mouvement
+(zoom 0,80 → 0,62 pendant qu'un voile blanc se dissipe).
+
+**Deux réglages corrigés en visionnant :**
+
+- croissance **quadratique et non cubique** : en cubique la carte restait quasi
+  immobile 12 images — précisément l'immobilité à supprimer — et ne couvrait le
+  cadre qu'une image avant la coupe ;
+- **la porte n'était pas la bonne carte.** J'avais pris `Booking.com`, qui à
+  l'instant de la poussée est déjà sortie par le haut (`y = −59`) : la plaque
+  semblait gonfler depuis le bord supérieur. En calculant la position des six
+  cartes à cet instant, `Expedia` est à **y = 543, le centre du cadre à 3 px
+  près**. Et le recentrage a désormais sa propre base de temps, rapide, sinon il
+  finissait quand la carte faisait déjà six fois sa taille.
+
+### Navigateur → « un vrai métier »
+
+**La fenêtre du navigateur ne quittait jamais le cadre.** Sa sortie descendait de
+780 px là où il en faut 844 : la coupe la **tranchait en pleine sortie**. C'était
+ça, l'abruptitude de ce raccord — un objet coupé, pas un problème de rythme.
+Course portée à 940 px, elle est dehors à f458, trois images avant la coupe.
+
+### « métier » → les 5 étapes
+
+La sortie du texte était un fondu d'opacité. C'est désormais **l'entrée jouée à
+l'envers** : les lettres repartent hors focus dans le halo surexposé d'où elles
+étaient venues. Un fondu plat est justement ce qui fait lire une frontière comme
+deux scènes empilées.
+
+### Tous les fonds appariés
+
+`Ink glow` valait 0,85 / 1 / 0,9 / 0,5 / 0,55 selon les scènes, donc la
+luminosité sautait à plusieurs coupes. Toute la traversée sombre est à 0,9, puis
+descend à 0,5 à l'approche des avis, et `KeyRise` passe de 0,55 à 0,5.
+
+### Les quatre raccords, mesurés sur le rendu
+
+| Raccord | Variation à la coupe | Variation max ailleurs |
+|---|---|---|
+| navigateur → « un vrai métier » | **0,0447** | 14,06 |
+| « métier » → les 5 étapes | **0,2089** | 0,44 |
+| 5 étapes → avis | **0,0221** | 0,27 |
+| réservations → agenda | **0,0000** | 0,25 |
+
+Dans chaque cas la variation à la coupe est plus faible que la variation
+ordinaire de la séquence : les raccords sont indistinguables d'images courantes.
+Celui des réservations affiche 0,0000 — images rigoureusement identiques de part
+et d'autre.
+
+Défilé des avis mesuré par corrélation : **8,00 px/image de moyenne, minimum
+8,00** — il ne retombe jamais à zéro.
+
+### Timeline
+
+Le film passe de 49,6 s à **42,3 s** (2533 images). Décalages : **−374** sur
+`KeyRise`, **−404** sur `LogoReveal` et `Diffusion`, **−444** sur `Simple`,
+`EndCard` et le disque `MORPH_R`.
 
 ## Septième passage — un seul plan continu, et un beat logo allégé
 

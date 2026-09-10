@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {C, W, H, SANS, MONO, T} from '../theme';
 import {Paper} from '../components/Grounds';
-import {keyframes, prog} from '../../ease';
+import {prog} from '../../ease';
 import {EASE} from '../../bezier';
 
 /** The arrow pointer: dark fill, thick paper outline. */
@@ -74,12 +74,22 @@ const BTN_ROW = 2;
 const RIGHT_MARGIN = 150;
 const TARGET_Y = H / 2;
 
-const WIDE: [number, number][] = [[FROM, 0.62], [ZOOM_FROM, 0.62]];
+/**
+ * The beat opens INSIDE the booking card that flooded the frame at the end of
+ * the previous beat, and pulls back out of it. So the wide shot is arrived at
+ * rather than cut to: the zoom eases 0.80 -> 0.62 while a white veil clears,
+ * which keeps the camera moving across the boundary. A camera already in motion
+ * absorbs a cut; a camera that starts moving at the cut announces it.
+ */
+const ARRIVE = 34;
+const VEIL = 14;
 
 export const Calendar: React.FC<{frame: number}> = ({frame}) => {
-  // wide shot, then a slow Bezier push-in — 0.62 to 1.22, not 0.84 to 2.15
+  // out of the card, then the held wide shot, then the slow push-in to the click
+  const arrive = EASE.camera(prog(frame, FROM, FROM + ARRIVE));
+  const wide = 0.8 + (0.62 - 0.8) * arrive;
   const push = EASE.camera(prog(frame, ZOOM_FROM, TO - 10));
-  const zoom = keyframes(frame, WIDE) + (1.22 - 0.62) * push;
+  const zoom = wide + (1.22 - 0.62) * push;
 
   // solved from the row's own box model, so the pointer cannot miss it
   const ROW_L = 70;
@@ -132,7 +142,7 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
         }}
       >
         {ROWS.map((r, i) => {
-          const p = EASE.entrance(prog(frame, FROM + i * 9, FROM + 44 + i * 9));
+          const p = EASE.entrance(prog(frame, FROM + 10 + i * 9, FROM + 54 + i * 9));
           const isBtn = i === BTN_ROW;
           return (
             <div
@@ -243,6 +253,11 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
       <div style={{position: 'absolute', left: cx, top: cy}}>
         <Cursor size={CUR} />
       </div>
+
+      {/* the white the booking card flooded the frame with, clearing away */}
+      <AbsoluteFill
+        style={{background: C.paper, opacity: 1 - prog(frame, FROM, FROM + VEIL)}}
+      />
     </AbsoluteFill>
   );
 };

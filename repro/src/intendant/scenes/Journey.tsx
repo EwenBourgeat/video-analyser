@@ -32,7 +32,7 @@ import {EASE} from '../../bezier';
  */
 
 const FROM = 684;
-const TO = 1199;
+const TO = 1185;
 
 /** Geometry, in master pixels, measured off the reference. */
 const X0 = 700;
@@ -64,8 +64,26 @@ const RAMP_IN = ARRIVE_0 - FROM;
  * ground where the reviews then build. The braking is placed late enough that
  * station 05 has finished leaving before it starts.
  */
-const BRAKE_FROM = 1145;
-const BRAKE = 54;
+const RUSH_FROM = 1145;
+const RUSH = 40;
+/**
+ * The camera does not slow at the end of the travelling — it SPEEDS UP, from
+ * 12.3 px/frame to 34, and hands over to the reviews at that speed.
+ *
+ * This is a whip: the camera rushes across the empty ground between the last
+ * service and the first review, then decelerates onto the reviews on the far
+ * side. It solves a problem that is arithmetic rather than aesthetic. A row of
+ * cards entering from the right has to travel a full frame width — 1920 px —
+ * before three of them are on screen. At the reviews' own 8 px/frame that takes
+ * 240 frames, which is the entire four-second beat: the picture would only fill
+ * on its last frame. At 34 the crossing takes 56 frames, and the frame is full
+ * 1.1 s in with three seconds of readable drift left.
+ *
+ * Speed costs nothing here because there is nothing on screen to look at, and
+ * 34 px/frame moves a 560 px card by 6 % of its own width per frame, so it
+ * neither strobes nor smears.
+ */
+const RUSH_TO = 34;
 
 /**
  * Camera x. Constant through the stations, with velocity ramped from and back
@@ -79,16 +97,22 @@ const camXAt = (f: number) => {
     const u = Math.max(0, (f - FROM) / RAMP_IN);
     return cruise(ARRIVE_0) - (RATE * RAMP_IN * (1 - u * u)) / 2;
   }
-  if (f <= BRAKE_FROM) return cruise(f);
+  if (f <= RUSH_FROM) return cruise(f);
   /**
-   * Braking on a smoothstep: v(u) = RATE * (1 - (3u² - 2u³)), integrated to
-   * u - u³ + u⁴/2. A linear velocity ramp covers the same ground but steps the
-   * acceleration from 0 to its full value on the first frame and back on the
-   * last — a jerk at both ends of the brake. Here acceleration starts and ends
-   * at zero, which is what makes the camera settle rather than stop.
+   * Smoothstep from RATE to RUSH_TO:
+   *   v(u) = RATE + (RUSH_TO - RATE) * (3u² - 2u³)
+   * integrated to  RATE*u + (RUSH_TO - RATE) * (u³ - u⁴/2).
+   * A linear ramp covers the same ground but steps the acceleration from zero to
+   * its full value on the first frame and back on the last — a jerk at both
+   * ends. Here acceleration starts and ends at zero.
    */
-  const u = Math.min(1, (f - BRAKE_FROM) / BRAKE);
-  return cruise(BRAKE_FROM) + RATE * BRAKE * (u - u * u * u + (u * u * u * u) / 2);
+  const u = Math.min(1, (f - RUSH_FROM) / RUSH);
+  const d = RUSH_TO - RATE;
+  return (
+    cruise(RUSH_FROM) +
+    RUSH * (RATE * u + d * (u * u * u - (u * u * u * u) / 2)) +
+    Math.max(0, f - RUSH_FROM - RUSH) * RUSH_TO
+  );
 };
 
 const sineY = (x: number) => MID - AMP * Math.cos((Math.PI * (x - X0)) / SPACING);
@@ -135,7 +159,7 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
         drawn on either side of it — but a mismatched ground would still have
         made the background brightness jump at that exact frame.
       */}
-      <Ink glow={0.9 - 0.4 * prog(frame, BRAKE_FROM, TO)} />
+      <Ink glow={0.9 - 0.4 * prog(frame, RUSH_FROM, TO)} />
 
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute'}}>
         <defs>

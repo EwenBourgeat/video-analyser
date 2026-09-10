@@ -18,14 +18,14 @@ import {keyframes} from '../../ease';
  * not effects.
  */
 
-const FROM = 1799;
+const FROM = 1425;
 
 const SCALE: [number, number][] = [
-  [FROM, 0.94], [1843, 0.96], [1859, 1.02], [1879, 1.10], [1903, 1.15], [1935, 1.17],
+  [FROM, 0.94], [1460, 0.96], [1473, 1.02], [1489, 1.10], [1508, 1.15], [1534, 1.17],
 ];
 const TOP: [number, number][] = [
-  [FROM, 1250], [1813, 910], [1827, 706], [1841, 600], [1853, 570],
-  [1869, 580], [1887, 604], [1907, 622], [1935, 632],
+  [FROM, 1250], [1436, 910], [1447, 706], [1459, 600], [1468, 570],
+  [1481, 580], [1495, 604], [1511, 622], [1534, 632],
 ];
 
 export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
@@ -35,7 +35,7 @@ export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
 
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
-      <Ink glow={0.55} />
+      <Ink glow={0.5} />
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute'}}>
         <defs>
           <linearGradient id="keyGrad" x1="0" y1="0" x2="0.35" y2="1">
@@ -74,8 +74,8 @@ export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
       >
         <Kinetic
           frame={frame}
-          from={FROM + 16}
-          to={FROM + 96}
+          from={FROM + 13}
+          to={FROM + 77}
           fontSize={96}
           tone="dark"
           segments={[{text: 'vous ne gérez '}, {text: 'plus rien', accent: true}]}

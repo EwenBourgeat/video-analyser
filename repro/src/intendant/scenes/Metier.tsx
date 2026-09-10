@@ -75,11 +75,18 @@ const FONT = 72;
 export const Metier: React.FC<{frame: number}> = ({frame}) => {
   // the wave's head, in letters along the sentence
   const head = READING(prog(frame, FROM, FROM + REVEAL)) * (TOTAL + SOFT);
-  const out = 1 - prog(frame, TO - 14, TO);
+  /**
+   * The exit is the entrance played backwards: the letters go out of focus and
+   * back into the over-exposed bloom they resolved out of. It used to be a flat
+   * opacity fade on the whole block, which is a different gesture from the one
+   * the beat is built on — and a plain fade is exactly what makes a boundary
+   * read as two scenes stacked rather than one continuous thing.
+   */
+  const exit = prog(frame, TO - 30, TO);
 
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
-      <Ink />
+      <Ink glow={0.9} />
       <div
         style={{
           position: 'absolute',
@@ -88,7 +95,6 @@ export const Metier: React.FC<{frame: number}> = ({frame}) => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: out,
           fontFamily: SANS,
           fontWeight: 600,
           fontSize: FONT,
@@ -103,7 +109,7 @@ export const Metier: React.FC<{frame: number}> = ({frame}) => {
             <div key={ri} style={{display: 'flex', whiteSpace: 'pre', height: '1.2em'}}>
               {[...row].map((ch, ci) => {
                 const i = before + ci;
-                const p = SETTLE(Math.max(0, Math.min(1, (head - i) / SOFT)));
+                const p = SETTLE(Math.max(0, Math.min(1, (head - i) / SOFT))) * (1 - exit);
                 const done = p > 0.999;
                 // opacity leads the resolve so a letter is never a grey smudge
                 const o = Math.min(1, p * 1.5);

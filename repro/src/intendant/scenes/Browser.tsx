@@ -28,7 +28,14 @@ export const Browser: React.FC<{frame: number}> = ({frame}) => {
   const pageW = ramp(frame, [PULL_FROM, PULL_TO], [1900, 1216], EASE.pullback);
   const pageH = pageW / (16 / 9);
   const pageTop = ramp(frame, [PULL_FROM, PULL_TO], [22, 236], EASE.pullback);
-  const exitY = frame > 424 ? ramp(frame, [424, 466], [0, 780], EASE.exit) : 0;
+  /**
+   * The window has to be COMPLETELY out of frame before the cut, and it never
+   * was: it slid down 780 px when 844 are needed to clear a 736 px-tall window
+   * sitting at y = 236. So the beat cut on a window still halfway through its
+   * exit — the abruptness was a sliced object, not a timing problem. 940 px,
+   * finished by f458, leaves three clear frames before the boundary.
+   */
+  const exitY = frame > 418 ? ramp(frame, [418, 458], [0, 940], EASE.exit) : 0;
 
   const left = W / 2 - pageW / 2;
   const top = pageTop + exitY;
@@ -40,7 +47,7 @@ export const Browser: React.FC<{frame: number}> = ({frame}) => {
 
   return (
     <AbsoluteFill>
-      <Ink glow={0.85} />
+      <Ink glow={0.9} />
       <div
         style={{
           position: 'absolute',

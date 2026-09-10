@@ -3,7 +3,7 @@ import {AbsoluteFill} from 'remotion';
 import {C, W, H, SANS, MONO} from '../theme';
 import {Paper} from '../components/Grounds';
 import {Mark} from '../components/Brand';
-import {keyframes, prog, ramp} from '../../ease';
+import {keyframes, prog} from '../../ease';
 import {EASE} from '../../bezier';
 
 /**
@@ -23,14 +23,14 @@ import {EASE} from '../../bezier';
  * here, which is exactly what the beat says.
  */
 
-const FROM = 2021;
-const TO = 2341;
+const FROM = 1617;
+const TO = 1897;
 /**
  * The rain waits until the mark is well past the middle and heading left — much
  * later than it used to start. It cannot wait for the mark to stop, though: the
  * rows are gone by then, and holding both back left twenty frames of empty page.
  */
-const HANDOVER = 2201;
+const HANDOVER = 1797;
 
 const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
 
@@ -41,11 +41,35 @@ const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
  * character — "pas assez fluide". It is now a single Bezier move: it leaves
  * slowly, crosses with real speed, and settles long on the left.
  */
-const HUB_FROM = 2117;
-const HUB_TO = 2229;
+const HUB_FROM = 1713;
+const HUB_TO = 1825;
+
+/**
+ * The push-through. On the last 44 frames one booking card stops rising, centres
+ * itself and swells until its white plate owns the frame — the cut then happens
+ * hidden inside that white, and the agenda opens out of it on the far side.
+ *
+ * This replaces a straight cut whose real fault was measured rather than felt:
+ * the mark reached its resting place and then sat there, motionless, for 112
+ * frames before vanishing. That stillness, as much as the cut itself, is what
+ * made the two beats read as separate scenes rather than one continuous move.
+ * The beat is 40 frames shorter as well, so the wait is now 72 frames.
+ */
+const PUSH_FROM = 1853;
+/**
+ * Which booking becomes the doorway — chosen by measurement, not by eye. At the
+ * frame the push begins the six notes sit at y = -196, -59, 611, 543, 913 and
+ * 1340; the first two have already left the top of frame. Expedia is at 543,
+ * three pixels off the centre of a 1080 frame, so it barely has to move before
+ * it opens. Picking one that had already gone made the card appear to swell from
+ * the top edge instead of from the middle of the picture.
+ */
+const HERO = 3;
+/** Big enough that the plate covers 1920x1080 well before the cut. */
+const HERO_SCALE = 14;
 
 const ROWS_X: [number, number][] = [
-  [2021, 96], [2113, 96], [2147, -220], [2179, -900], [2207, -1300], [2341, -1400],
+  [1617, 96], [1709, 96], [1743, -220], [1775, -900], [1803, -1300], [1897, -1400],
 ];
 
 const Spinner: React.FC<{size: number; frame: number}> = ({size, frame}) => (
@@ -91,14 +115,16 @@ const NOTES: [string, string, number, number, number, number][] = [
   ['Booking.com', '455 €', 1230, 1980, 0.86, 0.9],
 ];
 
-const Note: React.FC<{p: string; a: string; x: number; y: number; s: number; o: number}> = ({
-  p,
-  a,
-  x,
-  y,
-  s,
-  o,
-}) => (
+const Note: React.FC<{
+  p: string;
+  a: string;
+  x: number;
+  y: number;
+  s: number;
+  o: number;
+  /** Content opacity, separate from the card's, so the plate can outlive its text. */
+  inner?: number;
+}> = ({p, a, x, y, s, o, inner = 1}) => (
   <div
     style={{
       position: 'absolute',
@@ -117,9 +143,10 @@ const Note: React.FC<{p: string; a: string; x: number; y: number; s: number; o: 
       justifyContent: 'space-between',
       gap: 24,
       opacity: o,
+      boxSizing: 'border-box',
     }}
   >
-    <div style={{display: 'flex', alignItems: 'center', gap: 18}}>
+    <div style={{display: 'flex', alignItems: 'center', gap: 18, opacity: inner}}>
       <span style={{display: 'inline-flex'}}>
         <Tick size={40} p={1} />
       </span>
@@ -130,7 +157,9 @@ const Note: React.FC<{p: string; a: string; x: number; y: number; s: number; o: 
         </div>
       </div>
     </div>
-    <div style={{fontFamily: MONO, fontWeight: 500, fontSize: 38, color: C.blue600}}>{a}</div>
+    <div style={{fontFamily: MONO, fontWeight: 500, fontSize: 38, color: C.blue600, opacity: inner}}>
+      {a}
+    </div>
   </div>
 );
 
@@ -153,9 +182,17 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
   // so the two scenes share one position at the cut
   const markY = H / 2 - 44 * (1 - hub);
   const rowsX = keyframes(frame, ROWS_X);
-  const rowsOut = 1 - prog(frame, 2183, 2209);
+  const rowsOut = 1 - prog(frame, 1779, 1805);
   const rain = prog(frame, HANDOVER, TO);
   const rainIn = EASE.entrance(prog(frame, HANDOVER, HANDOVER + 34));
+  /**
+   * Quadratic, not cubic. A cubic ease-in leaves the card almost motionless for
+   * its first dozen frames, which is precisely the stillness this transition
+   * exists to remove; squaring gets it visibly opening straight away and still
+   * floods the frame with nine frames to spare before the cut.
+   */
+  const pushT = prog(frame, PUSH_FROM, TO);
+  const push = pushT * pushT;
 
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
@@ -250,17 +287,38 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
 
       {/* the bookings start dropping as the rows leave — no cut between them */}
       {rain > 0
-        ? NOTES.map(([p, a, x, y, s, sp], i) => (
-            <Note
-              key={i}
-              p={p}
-              a={a}
-              x={x}
-              y={y - rain * 1270 * sp}
-              s={s}
-              o={rainIn}
-            />
+        ? NOTES.filter((_, i) => i !== HERO).map(([p, a, x, y, s, sp], i) => (
+            <Note key={i} p={p} a={a} x={x} y={y - rain * 1270 * sp} s={s} o={rainIn} />
           ))
+        : null}
+
+      {/*
+        The doorway, drawn last so it passes in front of everything as it grows —
+        including the mark, which therefore needs no exit of its own.
+      */}
+      {rain > 0
+        ? (() => {
+            const [hp, ha, hx, hy, hs, hsp] = NOTES[HERO];
+            /**
+             * The move to centre gets its OWN clock, and a fast one: derived
+             * from `push` it finished only once the card was already six times
+             * its size, so the card was still travelling while it covered the
+             * frame. It now settles in 16 frames, while it is barely larger
+             * than it started.
+             */
+            const centre = EASE.smooth(prog(frame, PUSH_FROM, PUSH_FROM + 16));
+            return (
+              <Note
+                p={hp}
+                a={ha}
+                x={hx + (W / 2 - hx) * centre}
+                y={(hy - rain * 1270 * hsp) * (1 - centre) + (H / 2) * centre}
+                s={hs + (HERO_SCALE - hs) * push}
+                o={rainIn}
+                inner={1 - Math.min(1, push * 3)}
+              />
+            );
+          })()
         : null}
     </AbsoluteFill>
   );
