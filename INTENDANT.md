@@ -1,6 +1,6 @@
 # L'Intendant — film de conciergerie
 
-Animation de 42 s pour **L'Intendant**, conciergerie de location courte durée à
+Animation de 48,5 s pour **L'Intendant**, conciergerie de location courte durée à
 Toulouse. Révisée d'après `Prompt.pdf`, `Prompt2.pdf`, `Prompt3.pdf`, `prompt4.pdf`,
 puis une nouvelle lecture image par image de la vidéo de référence.
 
@@ -8,13 +8,64 @@ puis une nouvelle lecture image par image de la vidéo de référence.
 
 | Fichier | Format |
 |---|---|
-| **`repro/out/intendant_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 42 s |
+| **`repro/out/intendant_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 48,5 s |
 | `repro/out/intendant_9x16.mp4` | 1080 × 1920 @ 60 fps |
 
 ```bash
 open repro/out/intendant_16x9.mp4
 cd repro && npx remotion studio      # composition "Intendant"
 ```
+
+## Sixième passage — la scène des avis, refaite sans aucune chute
+
+Demande : plus aucune notion de chute ; trois avis sur la largeur, apparition
+moderne et rythmée ; puis un défilé droite → gauche donnant l'impression d'une
+panoplie d'avis, avec le temps de les lire au début.
+
+Le beat passe de **3,5 s à 10 s** (1064 → 1664) — trois avis ne se lisent pas en
+3,5 s. Tout ce qui suit est décalé de +330 images. À noter pour la maintenance :
+les tables de `KeyRise` mélangent frames et valeurs (`[1288, 910]` = frame 1288,
+hauteur 910 px), donc un décalage numérique global aurait corrompu les positions.
+
+### Ce que dit la pratique du métier, et ce que j'en ai gardé
+
+| Principe | Application |
+|---|---|
+| **15–25 s par cycle** pour un défilé de cartes ; plus vite paraît anxiogène, plus lent paraît cassé | 12 cartes × 624 px = 7488 px à 7 px/image → **cycle de 17,8 s** |
+| Les cartes demandent un **rythme plus lent et une séparation visuelle nette** | 560 × 302 px, 64 px d'écart, ombre portée qui monte avec la carte |
+| **Décalage entre couches** (3 images à 30 fps) | cartes espacées de 8 images ; dans chacune, les 5 étoiles éclosent 3 images d'écart |
+| Masque dégradé sur les bords | **écarté — voir plus bas** |
+
+Le démarrage du défilé suit une rampe de vitesse en *smoothstep*, donc
+l'accélération elle-même part de zéro et y revient. Intégrée, elle vaut
+`u³ − u⁴/2` : position, vitesse et accélération sont continues au passage
+maintien → dérive.
+
+**Mesuré sur le rendu**, pas seulement calculé : corrélation horizontale image
+par image sur la bande des cartes.
+
+| | Mesure | Cible |
+|---|---|---|
+| Maintien | **0,00 px/image** | 0 |
+| Croisière | **6,91 px/image** | 7,0 |
+| Montée | 0 → 0,6 → 2,0 → 3,6 → 5,0 → 6,0 → 6,8 → 7,0 | profil smoothstep |
+
+### Cinq défauts trouvés en visionnant le rendu
+
+| Défaut | Cause | Correction |
+|---|---|---|
+| Liseré de 32 px de la 4ᵉ carte visible à droite pendant tout le maintien | écart de 44 px : la carte se posait à x = 1888 | écart porté à **64 px**, elle démarre à 1928, hors cadre |
+| Cartes à moitié vides | hauteur fixe de 356 px pour une citation d'une ligne | **302 px** |
+| Bande grise sur les cartes aux deux bords | **le masque dégradé est un conseil de marquee *web*.** Baisser l'alpha d'une carte blanche sur fond quasi noir la fait passer par le gris : ce n'est pas un défaut de courbe, c'est ce à quoi ressemble du blanc sur noir à 50 % d'alpha | **masque supprimé.** Sur une page, le bord du conteneur est une ligne arbitraire qu'il faut cacher ; dans un film, le bord *est* le cadre, et sortir du champ est du langage cinéma ordinaire |
+| Cartes grises à l'arrivée, puis noms tranchés en deux | même cause pour le gris ; le volet qui l'a remplacé coupait le texte en plein milieu | **plaque et contenu séparés** : le volet découvre la plaque blanche, le texte apparaît ensuite par-dessus le blanc — donc jamais de gris, jamais de glyphe coupé |
+| 0,43 s de rectangle blanc vide, trois à la fois | le volet durait 38 images avant que le texte n'arrive | volet ramené à **26 images**, texte démarrant à 12 : fenêtre blanche de **0,2 s** |
+
+### Chronologie
+
+Entête 0,07 s → cartes posées à 1,53 s → **3,47 s d'immobilité pour lire** →
+dérive jusqu'à 10 s. Les trois avis de tête sont les plus courts du lot, choisis
+pour tenir dans ce temps de lecture ; les plus longs passent ensuite dans le
+défilé, où ils n'ont plus à être lus intégralement.
 
 ## Cinquième passage — nouvelle lecture image par image de la source
 
@@ -235,7 +286,7 @@ Dis-moi et je bascule.
 | 3 | La scène se révèle être un écran | sombre |
 | 4 | « gérer une location courte durée, c'est un vrai métier » | sombre |
 | 5 | Les 5 services, travelling | sombre |
-| 6 | La pluie d'avis Google | sombre |
+| 6 | Trois avis Google, puis le défilé | sombre |
 | 7 | La clé — « vous ne gérez plus rien » | sombre |
 | 8 | Révélation de la marque | blanc |
 | 9-10 | Diffusion 4 plateformes → pluie de réservations (continu) | blanc |

@@ -74,13 +74,13 @@ export const T = {
   browser: {from: 300, to: 462},
   metier: {from: 466, to: 684},
   journey: {from: 684, to: 1064},
-  reviews: {from: 1064, to: 1274},
-  key: {from: 1274, to: 1424},
-  logo: {from: 1424, to: 1564},
-  diffusion: {from: 1564, to: 1884},
-  calendar: {from: 1884, to: 2114},
-  simple: {from: 2114, to: 2274},
-  endcard: {from: 2274, to: 2520},
+  reviews: {from: 1064, to: 1664},
+  key: {from: 1664, to: 1814},
+  logo: {from: 1814, to: 1954},
+  diffusion: {from: 1954, to: 2274},
+  calendar: {from: 2274, to: 2504},
+  simple: {from: 2504, to: 2664},
+  endcard: {from: 2664, to: 2910},
 } as const;
 
-export const TOTAL_FRAMES = 2520; // 42 s
+export const TOTAL_FRAMES = 2910; // 48,5 s

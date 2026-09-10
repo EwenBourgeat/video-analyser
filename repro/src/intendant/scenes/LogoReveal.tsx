@@ -12,7 +12,7 @@ import {ramp, softOut, softOutQuint, prog} from '../../ease';
  * it and the wordmark typing on after.
  */
 
-const FROM = 1424;
+const FROM = 1814;
 const MARK = 300;
 
 export const LogoReveal: React.FC<{frame: number}> = ({frame}) => {

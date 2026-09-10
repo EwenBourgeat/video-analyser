@@ -23,14 +23,14 @@ import {EASE} from '../../bezier';
  * here, which is exactly what the beat says.
  */
 
-const FROM = 1564;
-const TO = 1884;
+const FROM = 1954;
+const TO = 2274;
 /**
  * The rain waits until the mark is well past the middle and heading left — much
  * later than it used to start. It cannot wait for the mark to stop, though: the
  * rows are gone by then, and holding both back left twenty frames of empty page.
  */
-const HANDOVER = 1744;
+const HANDOVER = 2134;
 
 const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
 
@@ -41,11 +41,11 @@ const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
  * character — "pas assez fluide". It is now a single Bezier move: it leaves
  * slowly, crosses with real speed, and settles long on the left.
  */
-const HUB_FROM = 1660;
-const HUB_TO = 1772;
+const HUB_FROM = 2050;
+const HUB_TO = 2162;
 
 const ROWS_X: [number, number][] = [
-  [1564, 96], [1656, 96], [1690, -220], [1722, -900], [1750, -1300], [1884, -1400],
+  [1954, 96], [2046, 96], [2080, -220], [2112, -900], [2140, -1300], [2274, -1400],
 ];
 
 const Spinner: React.FC<{size: number; frame: number}> = ({size, frame}) => (
@@ -153,7 +153,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
   // so the two scenes share one position at the cut
   const markY = H / 2 - 44 * (1 - hub);
   const rowsX = keyframes(frame, ROWS_X);
-  const rowsOut = 1 - prog(frame, 1726, 1752);
+  const rowsOut = 1 - prog(frame, 2116, 2142);
   const rain = prog(frame, HANDOVER, TO);
   const rainIn = EASE.entrance(prog(frame, HANDOVER, HANDOVER + 34));
 

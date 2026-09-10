@@ -18,7 +18,7 @@ import {EASE} from '../../bezier';
  * The offer still reads: the contact line carries it, without a button to click.
  */
 
-const FROM = 2274;
+const FROM = 2664;
 
 export const EndCard: React.FC<{frame: number}> = ({frame}) => {
   // longer, more overlapped ramps — nothing lands on the same frame as anything else

@@ -10,7 +10,7 @@ import {EASE} from '../../bezier';
  * "Vous percevez." is the site's own promise, so it carries the accent.
  */
 
-const FROM = 2114;
+const FROM = 2504;
 
 /** Exactly where the transition disc lands, so the hand-over is invisible. */
 export const BADGE_X = 960;
@@ -28,7 +28,7 @@ export const Simple: React.FC<{frame: number}> = ({frame}) => {
   const p1 = EASE.entrance(prog(frame, FROM + 46, FROM + 84));
   const p2 = EASE.entrance(prog(frame, FROM + 62, FROM + 104));
   // the transition disc contracts onto the badge and hands it over here
-  const badge = prog(frame, 2180, 2192);
+  const badge = prog(frame, 2570, 2582);
 
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>

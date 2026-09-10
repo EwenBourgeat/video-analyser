@@ -1,99 +1,134 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
-import {C, W, H, SANS} from '../theme';
+import {C, W, H, SANS, MONO, T} from '../theme';
 import {Ink} from '../components/Grounds';
-import {keyframes} from '../../ease';
+import {prog} from '../../ease';
+import {EASE} from '../../bezier';
 
 /**
- * Beat 6 — the owners' reviews, 15 -> 18.3 s.
+ * Beat 6 — what the owners say, 17.7 -> 27.7 s.
  *
- * Rebuilt to the client's notes: the cards are now laid out like real Google
- * reviews — round photo, name, "il y a N mois", the amber five-star row, the
- * quote, and the Google glyph in the corner — instead of the generic quote
- * cards they were. Portraits are real photographs (randomuser.me's sample set,
- * published for exactly this kind of mock-up).
+ * Rebuilt from scratch: the falling wall is gone entirely. The beat is now a
+ * row of three reviews that build across the frame, hold long enough to be
+ * read, and then drift right-to-left as an endless marquee.
  *
- * The fall was asked for explicitly: the cards had to drop from the sky the way
- * the Scalead wall does. The wall is static and the camera whips up through it,
- * which is what reads on screen as a downpour. Denser than before — eighteen
- * cards instead of eleven — and faster, so the stream is continuous rather than
- * a handful of drifting panels.
+ * The construction follows what motion designers actually do for a testimonial
+ * marquee, rather than what looked good in isolation:
+ *
+ *  - SPEED. The consensus figure for a card marquee is 15-25 s for one full
+ *    cycle; faster reads as anxious, slower as broken. Twelve cards at a 624 px
+ *    pitch is 7488 px, so 7 px/frame (420 px/s) puts one cycle at 17.8 s —
+ *    at the quick end of that band, which suits a film where the row only runs
+ *    for five seconds rather than forever.
+ *
+ *  - STAGGER. Cards are offset 8 frames apart, and inside each one the five
+ *    stars pop 3 frames apart as the wipe climbs past them. That second layer
+ *    is what gives the build its rhythm; without it three cards arriving is
+ *    just three cards arriving.
+ *
+ *  - NO JERK AT THE START OF THE SCROLL. Velocity ramps on a smoothstep, so
+ *    acceleration itself starts and ends at zero. Integrated, that is
+ *    u^3 - u^4/2 — a closed form, so position, speed and acceleration are all
+ *    continuous where the hold becomes the drift. A linear velocity ramp would
+ *    have put a visible kink at both ends of it.
  */
 
-const FROM = 1064;
-const CW = 620;
-const CH = 340;
+const FROM = T.reviews.from;
+const TO = T.reviews.to;
+
+/** Row geometry. Three cards across the frame, evenly gapped. */
+const CARD_W = 560;
+/**
+ * 302, down from 356. At 356 a one- or two-line quote left a bare 150 px of
+ * white at the foot of every card — it read as a layout that had not been
+ * finished rather than as deliberate space.
+ */
+const CARD_H = 302;
+/**
+ * 64, not the 44 it started at. At 44 the fourth card rests at x = 1888 and
+ * showed a 32 px sliver of itself at the right edge all through the hold, which
+ * quietly broke the "three across the frame" the beat is built on. The gap that
+ * pushes it clear is 60; 64 leaves a little margin and keeps the cycle at 17.8 s.
+ */
+const GAP = 64;
+const PITCH = CARD_W + GAP;
+const X0 = (W - (3 * CARD_W + 2 * GAP)) / 2;
+const ROW_Y = 536;   // recentres the block now that the cards are shorter
+
+/** Build. */
+const HEAD_AT = FROM + 4;
+const CARD_AT = FROM + 26;
+const CARD_STEP = 8;
+/**
+ * 26, down from 38. The plate arrives empty and the text follows it, so the
+ * wipe's length is also the length of time a blank white rectangle sits on
+ * screen. At 38 that was 0.43 s per card with three of them overlapping — three
+ * empty boxes at once, which reads as a page that has failed to load rather
+ * than as a build. At 26, with the text starting at 12, the blank window is
+ * 0.2 s: long enough to register as the card opening, too short to look broken.
+ */
+const CARD_DUR = 26;
+const STAR_STEP = 3;
+
+/** Scroll. */
+const SCROLL_AT = FROM + 300;
+const RAMP = 70;
+const CRUISE = 7;
+
+type Review = {q: string; who: string; when: string; photo: string};
 
 /**
- * The fall, taken straight from the TikTok reference rather than invented.
- *
- * The brief was "exactement comme dans la vidéo que tu as essayé de recopier,
- * re regarde là ... en terme de physique et de logique". That motion was already
- * measured, frame by frame, when the Scalead film was reverse-engineered: an
- * exhaustive 1D search on the row profile for the fast section (phase
- * correlation breaks down under that much motion blur) and template matching
- * for the landing.
- *
- * So this is the source's own curve — its ramp, its 124 px/frame peak, its
- * overshoot at the landing and the small settle back — remapped from 30 to
- * 60 fps and scaled by 1.322 to span this wall. Same physics, same logic.
+ * The reviews themselves. Texts are the client's own Google reviews; the three
+ * that lead are the shortest, because those are the ones that have to be read
+ * inside the hold rather than skimmed as they drift past.
  */
-const D: [number, number][] = [
-  [1064, 0], [1068, 212], [1072, 377], [1075, 512], [1079, 628], [1083, 730],
-  [1087, 818], [1091, 1067], [1094, 1152], [1098, 1236], [1102, 1157], [1106, 1252],
-  [1110, 1360], [1113, 1491], [1117, 1639], [1121, 1809], [1125, 1999], [1129, 2211],
-  [1132, 2447], [1136, 2729], [1140, 3033], [1144, 3371], [1148, 3569], [1153, 3940],
-  [1159, 4204], [1163, 4277], [1167, 4290], [1171, 4264], [1174, 4215],
-  [1180, 4200], [1191, 4197], [1203, 4204], [1214, 4208], [1260, 4205],
+const REVIEWS: Review[] = [
+  {q: 'Rien à gérer, des revenus chaque mois.', who: 'Alexis', when: 'il y a 2 mois', photo: 'p01'},
+  {q: 'Zéro stress, des voyageurs ravis.', who: 'Laure Estève', when: 'il y a 3 mois', photo: 'p10'},
+  {q: 'Le ménage est irréprochable.', who: 'Thomas Barrau', when: 'il y a 4 mois', photo: 'p11'},
+
+  {q: 'Un interlocuteur qui connaît vraiment mon logement.', who: 'Claire Fabre', when: 'il y a 5 mois', photo: 'p02'},
+  {q: 'Aucune mauvaise surprise depuis le premier mois.', who: 'Julien Roux', when: 'il y a 5 mois', photo: 'p03'},
+  {q: 'Réactifs, sérieux, et toujours joignables.', who: 'Anne Gaillard', when: 'il y a 6 mois', photo: 'p04'},
+  {q: 'Mon appartement est mieux tenu que par moi-même.', who: 'Pierre Sabatier', when: 'il y a 7 mois', photo: 'p05'},
+  {q: 'Le reporting mensuel est limpide.', who: 'Hélène Cazes', when: 'il y a 8 mois', photo: 'p06'},
+  {q: 'Ils ont doublé mon taux d’occupation.', who: 'Nicolas Bru', when: 'il y a 9 mois', photo: 'p07'},
+  {q: 'Une équipe locale qui connaît Toulouse.', who: 'Marc Vidal', when: 'il y a 10 mois', photo: 'p09'},
+  {q: 'Des revenus versés à la date près.', who: 'Émilie Cros', when: 'il y a 11 mois', photo: 'p12'},
+  {q: 'Je recommande sans hésiter.', who: 'Sophie Girard', when: 'il y a 1 an', photo: 'p08'},
 ];
 
-type Card = {
-  q: string;
-  who: string;
-  when: string;
-  photo: string;
-  x: number;
-  y: number;
-  rot?: number;
+const LOOP = REVIEWS.length * PITCH;
+
+/**
+ * THE EDGE FADE WAS REMOVED, and the reason is worth recording.
+ *
+ * The advice found for marquees is to mask both edges so items dissolve rather
+ * than appear and vanish at a hard border. That advice is written for the WEB,
+ * where a marquee sits mid-page and its container edge is an arbitrary line the
+ * reader can see is arbitrary. Applied here it actively hurt: fading a white
+ * card's alpha over this near-black ground takes it through grey, so each card
+ * entering or leaving carried a 250 px grey smear across itself. Widening the
+ * falloff and shaping it as an S-curve made the band softer but not absent,
+ * because the grey is not an artefact of the curve — it is what white over
+ * black looks like at 50 % alpha.
+ *
+ * In a film the frame edge is not arbitrary: it is the frame. Something moving
+ * out of shot is ordinary cinematic language, and every other beat in this film
+ * already lets elements cross it. So the cards simply travel off the edge.
+ */
+
+/**
+ * How far the row has travelled. Velocity ramps on a smoothstep and then holds,
+ * so there is no acceleration step at either end of the ramp.
+ */
+const offsetAt = (f: number) => {
+  const t = f - SCROLL_AT;
+  if (t <= 0) return 0;
+  if (t >= RAMP) return CRUISE * RAMP * 0.5 + (t - RAMP) * CRUISE;
+  const u = t / RAMP;
+  return CRUISE * RAMP * (u * u * u - (u * u * u * u) / 2);
 };
-
-const P = ['p01', 'p02', 'p03', 'p04', 'p05', 'p06', 'p07', 'p08', 'p09', 'p10', 'p11', 'p12'];
-
-const CARDS: Card[] = [
-  // Re-watching the reference settled this: its cards do not sit in a grid,
-  // they OVERLAP and they are TILTED. Cards land on top of cards, each one
-  // casting its shadow on the one below, at angles from -18 to +14 degrees.
-  // Later entries render on top, so the pile reads as something that was
-  // dropped rather than laid out.
-  {q: '« Rien à gérer, des revenus chaque mois. »', who: 'Alexis', when: 'il y a 2 mois', photo: P[0], x: 340, y: 150, rot: 7},
-  {q: '« Un interlocuteur qui connaît vraiment mon logement. »', who: 'Claire Fabre', when: 'il y a 3 mois', photo: P[1], x: 1144, y: -60, rot: -6},
-  {q: '« Aucune mauvaise surprise depuis le premier mois. »', who: 'Julien Roux', when: 'il y a 4 mois', photo: P[2], x: 1560, y: -300, rot: 11},
-  {q: '« Réactifs, sérieux, et toujours joignables. »', who: 'Anne Gaillard', when: 'il y a 5 mois', photo: P[3], x: 500, y: -470, rot: -12},
-  {q: '« Mon appartement est mieux tenu que par moi-même. »', who: 'Pierre Sabatier', when: 'il y a 5 mois', photo: P[4], x: 1150, y: -650, rot: 5},
-  {q: '« Le reporting mensuel est limpide. »', who: 'Hélène Cazes', when: 'il y a 6 mois', photo: P[5], x: 1720, y: -880, rot: -8},
-  {q: '« Ils ont doublé mon taux d’occupation. »', who: 'Nicolas Bru', when: 'il y a 7 mois', photo: P[6], x: 300, y: -1254, rot: 9},
-  {q: '« Je recommande sans hésiter. »', who: 'Sophie Girard', when: 'il y a 8 mois', photo: P[7], x: 880, y: -1290, rot: -4},
-  {q: '« Une équipe locale qui connaît Toulouse. »', who: 'Marc Vidal', when: 'il y a 8 mois', photo: P[8], x: 1480, y: -1500, rot: 13},
-  {q: '« Zéro stress, des voyageurs ravis. »', who: 'Laure Estève', when: 'il y a 9 mois', photo: P[9], x: 620, y: -1720, rot: -10},
-  {q: '« Le ménage est irréprochable. »', who: 'Thomas Barrau', when: 'il y a 10 mois', photo: P[10], x: 1250, y: -1930, rot: 6},
-  {q: '« Des revenus versés à la date près. »', who: 'Émilie Cros', when: 'il y a 11 mois', photo: P[11], x: 1780, y: -2160, rot: -14},
-  {q: '« Un suivi sérieux, mois après mois. »', who: 'Paul Rieux', when: 'il y a 11 mois', photo: P[2], x: 380, y: -2380, rot: 8},
-  {q: '« Ils gèrent tout, vraiment tout. »', who: 'Nadia Belkacem', when: 'il y a 1 an', photo: P[5], x: 1184, y: -2560, rot: -5},
-  {q: '« Mes voyageurs sont toujours ravis. »', who: 'Vincent Roques', when: 'il y a 1 an', photo: P[8], x: 1620, y: -2760, rot: 12},
-
-  // the landing pile — overlapping, tilted, layered front-to-back
-  {q: '« Une équipe locale qui connaît Toulouse. »', who: 'Marc Vidal', when: 'il y a 8 mois', photo: P[8], x: 1660, y: -3210, rot: 9},
-  {q: '« Le ménage est irréprochable. »', who: 'Thomas Barrau', when: 'il y a 10 mois', photo: P[10], x: 300, y: -3170, rot: -11},
-  {q: '« Des revenus versés à la date près. »', who: 'Émilie Cros', when: 'il y a 11 mois', photo: P[11], x: 1144, y: -3260, rot: 4},
-  {q: '« Nous avons confié notre logement il y a plusieurs mois et n’avons fait face à aucune mauvaise surprise. »', who: 'Alexis', when: 'il y a 3 mois', photo: P[3], x: 560, y: -3530, rot: 6},
-  {q: '« Je peux déléguer en toute confiance. »', who: 'Margaux Reymond', when: 'il y a 2 mois', photo: P[4], x: 1420, y: -3600, rot: -13},
-  {q: '« Dès le début, j’ai été rassurée par leur professionnalisme et leur réactivité. »', who: 'Margaux Reymond', when: 'il y a 2 mois', photo: P[0], x: 330, y: -3830, rot: -5},
-  {q: '« Merci pour votre travail et votre implication. »', who: 'Jade Peris', when: 'il y a 4 mois', photo: P[1], x: 1124, y: -3900, rot: 8},
-  {q: '« La gestion est sérieuse, l’équipe est disponible. »', who: 'Jade Peris', when: 'il y a 4 mois', photo: P[2], x: 1590, y: -3860, rot: -7},
-  {q: '« On sent l’envie du travail bien fait. »', who: 'Alexis', when: 'il y a 3 mois', photo: P[5], x: 780, y: -4180, rot: 14},
-  {q: '« Un professionnalisme rassurant. »', who: 'Claire Fabre', when: 'il y a 3 mois', photo: P[6], x: 1400, y: -4230, rot: -9},
-];
-
 
 const GoogleG: React.FC<{size: number}> = ({size}) => (
   <svg width={size} height={size} viewBox="0 0 48 48">
@@ -104,87 +139,187 @@ const GoogleG: React.FC<{size: number}> = ({size}) => (
   </svg>
 );
 
-const Stars: React.FC<{size: number}> = ({size}) => (
-  <div style={{display: 'flex', gap: size * 0.16}}>
-    {[0, 1, 2, 3, 4].map((i) => (
-      <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill={C.star}>
-        <path d="M12 2.2l3 6.4 6.9.9-5 4.9 1.2 6.9L12 18l-6.1 3.3 1.2-6.9-5-4.9 6.9-.9Z" />
-      </svg>
-    ))}
-  </div>
+const Star: React.FC<{size: number; p: number}> = ({size, p}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill={C.star}
+    style={{transform: `scale(${EASE.pop(p)})`, opacity: Math.min(1, p * 2)}}
+  >
+    <path d="M12 2.2l3 6.4 6.9.9-5 4.9 1.2 6.9L12 18l-6.1 3.3 1.2-6.9-5-4.9 6.9-.9Z" />
+  </svg>
 );
 
-const Face: React.FC<{c: Card; sy: number}> = ({c, sy}) => (
+/**
+ * One card, built as two layers.
+ *
+ * `p` wipes the PLATE up from the bottom; `cp` fades the CONTENT in over it;
+ * `sp` is the star stagger's own clock, in frames.
+ *
+ * The split is what makes the reveal usable. With the content inside the wiped
+ * element, the mask edge sliced straight through the reviewer's name for a few
+ * frames — a card cut in half reads as a mask, a name cut in half reads as a
+ * bug. Now the plate arrives first and the text fades in on top of it, which
+ * also means the fade happens over opaque white, so it never passes through the
+ * grey that fading over the dark ground produced.
+ */
+const Card: React.FC<{r: Review; x: number; p: number; cp: number; sp: number}> = ({
+  r,
+  x,
+  p,
+  cp,
+  sp,
+}) => (
   <div
     style={{
       position: 'absolute',
-      left: c.x - CW / 2,
-      top: sy - CH / 2,
-      width: CW,
-      height: CH,
-      borderRadius: 18,
-      background: C.paper,
-      // a tighter, darker shadow so a card visibly sits ON the one beneath it
-      boxShadow: '0 10px 22px rgba(0,0,0,0.42), 0 30px 70px rgba(0,0,0,0.5)',
-      transform: `rotate(${c.rot ?? 0}deg)`,
-      fontFamily: SANS,
-      padding: '34px 36px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 18,
-      overflow: 'hidden',
+      left: x,
+      top: ROW_Y + (1 - p) * 46,
+      width: CARD_W,
+      height: CARD_H,
     }}
   >
-    <div style={{display: 'flex', alignItems: 'center', gap: 18}}>
-      <Img
-        src={staticFile(`people/${c.photo}.jpg`)}
-        style={{width: 66, height: 66, borderRadius: '50%', objectFit: 'cover'}}
-      />
-      <div style={{flex: 1, minWidth: 0}}>
-        <div style={{fontWeight: 600, fontSize: 30, color: C.ink, letterSpacing: '-0.012em'}}>
-          {c.who}
-        </div>
-        <div style={{fontWeight: 400, fontSize: 22, color: '#70757A', marginTop: 3}}>
-          {c.when}
-        </div>
-      </div>
-      <GoogleG size={34} />
-    </div>
-    <Stars size={26} />
     <div
       style={{
-        fontWeight: 400,
-        fontSize: 29,
-        lineHeight: 1.36,
-        letterSpacing: '-0.008em',
-        color: C.inkSoft,
+        position: 'absolute',
+        inset: 0,
+        borderRadius: 30,
+        background: C.paper,
+        boxShadow: `0 ${18 * p}px ${44 * p}px rgba(0,0,0,${0.34 * p})`,
+        clipPath: `inset(${((1 - p) * 100).toFixed(2)}% 0 0 0 round 30px)`,
+      }}
+    />
+
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        padding: '30px 36px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 18,
+        fontFamily: SANS,
+        boxSizing: 'border-box',
+        opacity: cp,
       }}
     >
-      {c.q}
+      <div style={{display: 'flex', alignItems: 'center', gap: 18}}>
+        <Img
+          src={staticFile(`people/${r.photo}.jpg`)}
+          style={{width: 66, height: 66, borderRadius: '50%', objectFit: 'cover', flexShrink: 0}}
+        />
+        <div style={{flex: 1, minWidth: 0}}>
+          <div style={{fontWeight: 600, fontSize: 31, color: C.ink, letterSpacing: '-0.014em'}}>
+            {r.who}
+          </div>
+          <div style={{fontWeight: 400, fontSize: 22, color: '#70757A', marginTop: 3}}>
+            {r.when}
+          </div>
+        </div>
+        <GoogleG size={32} />
+      </div>
+
+      <div style={{display: 'flex', gap: 5, height: 27}}>
+        {[0, 1, 2, 3, 4].map((i) => (
+          <Star key={i} size={27} p={Math.max(0, Math.min(1, (sp - i * STAR_STEP) / 12))} />
+        ))}
+      </div>
+
+      <div
+        style={{
+          fontWeight: 400,
+          fontSize: 30,
+          lineHeight: 1.42,
+          letterSpacing: '-0.008em',
+          color: C.inkSoft,
+        }}
+      >
+        {`« ${r.q} »`}
+      </div>
     </div>
   </div>
 );
 
-/** One-frame shutter; slice count follows the speed of the fall. */
-const shutter = (frame: number) => {
-  const v = Math.abs(keyframes(frame + 0.5, D) - keyframes(frame - 0.5, D));
-  const n = Math.max(1, Math.min(11, Math.round(v / 7) | 1));
-  return Array.from({length: n}, (_, i) => -0.5 + (i + 0.5) / n);
-};
+export const Reviews: React.FC<{frame: number}> = ({frame}) => {
+  const offset = offsetAt(frame);
 
-export const Reviews: React.FC<{frame: number}> = ({frame}) => (
-  <AbsoluteFill style={{overflow: 'hidden'}}>
-    <Ink glow={0.5} />
-    {shutter(frame).map((o, oi) => (
-      // back-to-front alpha 1/(i+1): the stack averages instead of washing out
-      <div key={oi} style={{position: 'absolute', inset: 0, opacity: 1 / (oi + 1)}}>
-        {CARDS.map((c, i) => {
-          const sy = c.y + keyframes(frame + o, D);
-          if (sy < -CH || sy > H + CH) return null;
-          return <Face key={i} c={c} sy={sy} />;
+  // the edge mask widens as the drift begins, and only then
+
+  const kicker = EASE.entrance(prog(frame, HEAD_AT, HEAD_AT + 30));
+  const title = EASE.entrance(prog(frame, HEAD_AT + 10, HEAD_AT + 48));
+  const out = 1 - prog(frame, TO - 16, TO);
+
+  return (
+    <AbsoluteFill style={{overflow: 'hidden'}}>
+      {/*
+        The ground stays opaque to the last frame. Fading the WHOLE scene out
+        took it through the film's root background, which is white — so two dark
+        beats were joined by a white flash. Only the content fades; the dark
+        ground holds until the cut, and the beat that follows is dark too.
+      */}
+      <Ink glow={0.5} />
+
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 232,
+          width: W,
+          textAlign: 'center',
+          fontFamily: MONO,
+          fontWeight: 500,
+          fontSize: 26,
+          letterSpacing: '0.22em',
+          color: C.blue350,
+          opacity: kicker * out,
+          transform: `translateY(${(1 - kicker) * 14}px)`,
+        }}
+      >
+        AVIS GOOGLE
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 292,
+          width: W,
+          textAlign: 'center',
+          fontFamily: SANS,
+          fontWeight: 600,
+          fontSize: 76,
+          letterSpacing: '-0.03em',
+          color: C.inkDark,
+          opacity: title * out,
+          transform: `translateY(${(1 - title) * 22}px)`,
+        }}
+      >
+        Ce qu’en disent les propriétaires
+      </div>
+
+      <div
+        style={{position: 'absolute', inset: 0, opacity: out}}>
+        {REVIEWS.map((r, i) => {
+          // wrap so the row can never run out of cards
+          let x = X0 + i * PITCH - offset;
+          while (x < -CARD_W - GAP) x += LOOP;
+          if (x > W + GAP) return null;
+
+          // only the three that lead get the build; the rest arrive already formed
+          const at = CARD_AT + i * CARD_STEP;
+          const p = i < 3 ? EASE.entrance(prog(frame, at, at + CARD_DUR)) : 1;
+          // the text only starts once the plate is nearly all there
+          const cp = i < 3 ? EASE.entrance(prog(frame, at + 12, at + 32)) : 1;
+          /**
+           * The stars follow the text in, 3 frames apart. Their row keeps a
+           * fixed height so nothing below it shifts as they land.
+           */
+          const sp = i < 3 ? frame - (at + 28) : 99;
+
+          return <Card key={i} r={r} x={x} p={p} cp={cp} sp={sp} />;
         })}
       </div>
-    ))}
-    {void W}
-  </AbsoluteFill>
-);
+      {void H}
+    </AbsoluteFill>
+  );
+};
