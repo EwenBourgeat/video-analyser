@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, W, H, SANS} from '../theme';
+import {C, SANS} from '../theme';
+import {useStage, frontOf, cruiseBase} from '../format';
 import {Ink} from '../components/Grounds';
 import {Glyph, GlyphName} from '../components/Glyphs';
 import {prog} from '../../ease';
@@ -41,8 +42,13 @@ const MID = 540;
 const AMP = 200;
 const TILE = 190;   // measured on the reference: ~180-190 px of a 1920 frame
 
-/** The thread is drawn up to this screen column; the camera does the rest. */
-const FRONT = 1150;
+/**
+ * The thread is drawn up to this screen column; the camera does the rest.
+ * It is 60 % of the way across the picture, so it follows the frame: 1150 in
+ * 16:9, 650 in 4:5. Everything downstream — where the camera has to be for a
+ * station to arrive on time, and therefore the review row's world position too —
+ * is derived from it rather than restated.
+ */
 /** Pan rate at cruise, master px per frame at 60 fps. */
 const RATE = 12.3;
 
@@ -55,6 +61,20 @@ const arriveOf = (i: number) => ARRIVE_0 + i * ARRIVE_STEP;
 const ICON_LEAD = 18;
 const GHOST_LEAD = 26;
 const LABEL_LAG = 4;
+
+/**
+ * The label's reveal, per frame shape.
+ *
+ * In 16:9 it starts once the thread reaches the tile and takes 36 frames to
+ * finish, which is affordable because the station then stays on screen for
+ * another hundred. The 4:5 frame gives a station 87 frames in total, so those
+ * 36 would eat 40 % of its life: the label is instead started as the tile
+ * ENTERS the picture — it follows the icon rather than the thread — and reveals
+ * faster, finishing 6 frames after the thread lands. Fully legible for 1.36 s
+ * rather than 0.80.
+ */
+const labelTiming = (tall: boolean) =>
+  tall ? {lag: -16, dur: 18, step: 4} : {lag: LABEL_LAG, dur: 26, step: 6};
 
 /** Velocity ramps, kept clear of every station so arrivals stay exact. */
 const RAMP_IN = ARRIVE_0 - FROM;
@@ -94,8 +114,9 @@ const RUSH_TO = 44;
  * to zero outside them — so the pan never starts or stops on a step, and the
  * arrival frames stay exactly where the station timings expect them.
  */
-const camXAt = (f: number) => {
-  const cruise = (g: number) => -450 + (g - ARRIVE_0) * RATE;
+export const camXAt = (f: number, w: number, tall: boolean) => {
+  const FRONT = frontOf(w, tall);
+  const cruise = (g: number) => cruiseBase(w, tall) + (g - ARRIVE_0) * RATE;
   if (f < ARRIVE_0) {
     // v(u) = RATE * u, so displacement is quadratic and meets cruise at u = 1
     const u = Math.max(0, (f - FROM) / RAMP_IN);
@@ -149,7 +170,9 @@ const STEPS: Step[] = [
 ];
 
 export const Journey: React.FC<{frame: number}> = ({frame}) => {
-  const camX = camXAt(frame);
+  const {w: W, h: H, tall} = useStage();
+  const FRONT = frontOf(W, tall);
+  const camX = camXAt(frame, W, tall);
   // the dive that used to end this beat is gone: the camera only travels right
   const camY = 0;
   /** World x the thread has been drawn to, and never past its own end. */
@@ -196,11 +219,19 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
             return (
               <text
                 key={s.n}
-                x={x - 250}
-                y={sineY(x) + (s.below ? -210 : 300)}
+                /*
+                  The numeral must never sit where the label sits. In 16:9 it is
+                  pushed to the side opposite the label, which alternates above
+                  and below the wave. In 4:5 the label is ALWAYS under the tile,
+                  so the numeral always goes above it — centring both under the
+                  tile, as a first pass did, put the label straight on top of the
+                  figure.
+                */
+                x={tall ? x : x - 250}
+                y={tall ? sineY(x) - 150 : sineY(x) + (s.below ? -210 : 300)}
                 fontFamily={SANS}
                 fontWeight={700}
-                fontSize={300}
+                fontSize={tall ? 200 : 300}
                 fill={C.inkDark}
                 fillOpacity={0.10 * g}
                 textAnchor="middle"
@@ -248,8 +279,17 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
             <div
               style={{
                 position: 'absolute',
-                left: sx + (s.below ? TILE * 0.18 : TILE * 0.62),
-                top: s.below ? sy + TILE * 0.72 : sy - TILE * 0.30 - 68 * s.label.length,
+                /*
+                  Beside the tile in 16:9; centred UNDER it in 4:5, so a station
+                  occupies a narrow column instead of a wide one and nothing
+                  reaches past the arrival point into the right edge.
+                */
+                left: tall ? sx - 190 : sx + (s.below ? TILE * 0.18 : TILE * 0.62),
+                width: tall ? 380 : undefined,
+                textAlign: tall ? 'center' : undefined,
+                top: tall
+                  ? sy + TILE * 0.66
+                  : s.below ? sy + TILE * 0.72 : sy - TILE * 0.30 - 68 * s.label.length,
                 fontFamily: SANS,
                 fontWeight: 600,
                 fontSize: 54,
@@ -261,8 +301,9 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
             >
               {s.label.map((line, li) => {
                 // the label follows the thread, it does not precede it
+                const lt = labelTiming(tall);
                 const lp = EASE.entrance(
-                  prog(frame, arrive + LABEL_LAG + li * 6, arrive + LABEL_LAG + 26 + li * 6)
+                  prog(frame, arrive + lt.lag + li * lt.step, arrive + lt.lag + lt.dur + li * lt.step)
                 );
                 return (
                   <div key={li} style={{opacity: lp, transform: `translateY(${(1 - lp) * 14}px)`}}>

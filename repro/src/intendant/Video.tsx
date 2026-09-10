@@ -3,6 +3,7 @@ import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {loadFont as loadInstrument} from '@remotion/google-fonts/InstrumentSans';
 import {loadFont as loadJetBrains} from '@remotion/google-fonts/JetBrainsMono';
 import {C, T} from './theme';
+import {useStage} from './format';
 import {prog, softOut, inCubic} from '../ease';
 import {MapPins} from './scenes/MapPins';
 import {ClockStage} from './scenes/ClockStage';
@@ -14,7 +15,7 @@ import {KeyRise} from './scenes/KeyRise';
 import {LogoReveal} from './scenes/LogoReveal';
 import {Diffusion} from './scenes/Diffusion';
 import {Calendar} from './scenes/Calendar';
-import {Simple} from './scenes/Simple';
+import {Simple, badgeAt} from './scenes/Simple';
 import {EndCard} from './scenes/EndCard';
 import {Ink} from './components/Grounds';
 
@@ -37,6 +38,13 @@ const In: React.FC<{from: number; to: number; frame: number; children: React.Rea
 
 export const Intendant: React.FC = () => {
   const frame = useCurrentFrame();
+  /*
+    The disc reads the badge's position from the same helper the payoff line
+    uses, so the two can never drift apart — they used to be two hardcoded
+    copies of 960/516, which is exactly how a 24 px mismatch got in once before.
+  */
+  const {w, h} = useStage();
+  const badge = badgeAt(w, h);
 
   return (
     <AbsoluteFill style={{background: C.paper}}>
@@ -95,8 +103,8 @@ export const Intendant: React.FC = () => {
           <div
             style={{
               position: 'absolute',
-              left: 960,
-              top: 516,
+              left: badge.x,
+              top: badge.y,
               width: 2 * MORPH_R(frame),
               height: 2 * MORPH_R(frame),
               marginLeft: -MORPH_R(frame),
@@ -109,8 +117,8 @@ export const Intendant: React.FC = () => {
             <div
               style={{
                 position: 'absolute',
-                left: 960,
-                top: 516,
+                left: badge.x,
+                top: badge.y,
                 transform: 'translate(-50%,-50%)',
                 opacity: prog(frame, 2118, 2130),
               }}

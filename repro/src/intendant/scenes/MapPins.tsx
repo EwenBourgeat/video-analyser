@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, W, H} from '../../intendant/theme';
+import {C} from '../../intendant/theme';
+import {useStage, clockGeom} from '../format';
 import {Paper} from '../components/Grounds';
 import {keyframes, prog, softOut} from '../../ease';
 
@@ -24,17 +25,34 @@ import {keyframes, prog, softOut} from '../../ease';
  *    sweep, which is why the beat read as a fade rather than as a scan.
  */
 
-const CX = W / 2;
-/** The dial of the next beat sits here; the disc migrates onto it. */
-const CLOCK_CY = 0.895 * H;
-const CLOCK_R = 0.275 * W;
 
-// radius over time, shaped like the reference radar: hold, fast collapse, drift out
-const R: [number, number][] = [
-  [0, 980], [12, 960], [16, 900], [22, 760], [28, 640], [34, 560],
-  [40, 505], [46, 472], [52, 458], [64, 452], [90, 462], [120, 486],
-  [150, 508], [172, 520], [190, CLOCK_R],
-];
+
+/**
+ * Radius over time, shaped like the reference radar: hold, fast collapse, drift
+ * out — and landing on the dial's radius so the morph into beat 2 is exact.
+ *
+ * That last value now depends on the frame, so the table cannot be a plain
+ * module constant any more. It is memoised per radius instead: `keyframes()`
+ * caches its smoothed curve in a WeakMap keyed on the ARRAY ITSELF, so handing
+ * it a freshly built array every frame would silently recompute the monotone
+ * cubic and the Gaussian pass 60 times a second. One stable array per radius
+ * keeps that cache doing its job.
+ */
+const radiusTable = (() => {
+  const cache = new Map<number, [number, number][]>();
+  return (clockR: number) => {
+    let t = cache.get(clockR);
+    if (!t) {
+      t = [
+        [0, 980], [12, 960], [16, 900], [22, 760], [28, 640], [34, 560],
+        [40, 505], [46, 472], [52, 458], [64, 452], [90, 462], [120, 486],
+        [150, 508], [172, 520], [190, clockR],
+      ];
+      cache.set(clockR, t);
+    }
+    return t;
+  };
+})();
 
 /** Measured off the reference: 375 deg/s, i.e. 6.25 deg per frame at 60 fps. */
 const SWEEP_DPS = 375;
@@ -90,7 +108,13 @@ const SLICES = 14;
 const TAIL_DEG = 104;
 
 export const MapPins: React.FC<{frame: number}> = ({frame}) => {
-  const r = keyframes(frame, R);
+  const {w: W, h: H, tall} = useStage();
+  const CX = W / 2;
+  // the dial of the next beat sits here; the disc migrates onto it
+  const dial = clockGeom(W, H, tall);
+  const CLOCK_CY = dial.cy;
+  const CLOCK_R = dial.r;
+  const r = keyframes(frame, radiusTable(CLOCK_R));
   const head = sweepAt(frame);
   // slide the disc onto the dial's centre as it dissolves — a morph, not a cut
   const morph = softOut(prog(frame, 150, 190));

@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, H, SANS} from '../theme';
+import {C, SANS} from '../theme';
+import {useStage} from '../format';
 import {Ink} from '../components/Grounds';
 import {prog} from '../../ease';
 import {cubicBezier} from '../../bezier';
@@ -63,16 +64,29 @@ const READING = cubicBezier(0.35, 0.12, 0.3, 0.9);
 /** How a single letter comes out of the light — long tail on purpose. */
 const SETTLE = cubicBezier(0.45, 0, 0.22, 1);
 
-const ROWS = [
-  'Parce que gérer une location courte durée,',
-  'c’est un vrai métier.',
-];
-const ACCENT_ROW = 1;
-const TOTAL = ROWS[0].length + ROWS[1].length;
+/**
+ * The sentence is broken by hand for each frame rather than reflowed.
+ *
+ * In 4:5 it takes FOUR short lines instead of two long ones, and that is what
+ * lets the type get BIGGER rather than smaller: reflowing the 16:9 wording into
+ * a 1080-wide frame would have forced roughly 47 px to fit, where four short
+ * lines hold 80. Breaking by hand also means no word ever jumps rows mid-reveal.
+ */
+const LINES = (tall: boolean) =>
+  tall
+    ? ['Parce que gérer', 'une location', 'courte durée,', 'c’est un vrai métier.']
+    : ['Parce que gérer une location courte durée,', 'c’est un vrai métier.'];
 
-const FONT = 72;
+/** The closing line carries the accent, in either frame. */
+const accentRow = (rows: string[]) => rows.length - 1;
 
 export const Metier: React.FC<{frame: number}> = ({frame}) => {
+  const {tall} = useStage();
+  const rows = LINES(tall);
+  const ACCENT_ROW = accentRow(rows);
+  const TOTAL = rows.reduce((n, r) => n + r.length, 0);
+  const FONT = tall ? 80 : 72;
+
   // the wave's head, in letters along the sentence
   const head = READING(prog(frame, FROM, FROM + REVEAL)) * (TOTAL + SOFT);
   /**
@@ -102,9 +116,10 @@ export const Metier: React.FC<{frame: number}> = ({frame}) => {
           letterSpacing: '-0.028em',
         }}
       >
-        {ROWS.map((row, ri) => {
+        {rows.map((row, ri) => {
           const accent = ri === ACCENT_ROW;
-          const before = ri === 0 ? 0 : ROWS[0].length;
+          // letters are indexed continuously across every row, whatever their number
+          const before = rows.slice(0, ri).reduce((n, r) => n + r.length, 0);
           return (
             <div key={ri} style={{display: 'flex', whiteSpace: 'pre', height: '1.2em'}}>
               {[...row].map((ch, ci) => {
@@ -137,7 +152,6 @@ export const Metier: React.FC<{frame: number}> = ({frame}) => {
           );
         })}
       </div>
-      {void H}
     </AbsoluteFill>
   );
 };

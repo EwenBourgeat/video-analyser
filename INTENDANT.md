@@ -6,15 +6,55 @@ puis une nouvelle lecture image par image de la vidéo de référence.
 
 ## Livrables
 
-| Fichier | Format |
-|---|---|
-| **`repro/out/intendant_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 41,2 s |
-| `repro/out/intendant_9x16.mp4` | 1080 × 1920 @ 60 fps |
+| Fichier | Format | Usage |
+|---|---|---|
+| **`repro/out/intendant_4x5.mp4`** | **1080 × 1350 @ 60 fps** | **fil Facebook / Instagram — le format de diffusion** |
+| `repro/out/intendant_16x9.mp4` | 1920 × 1080 @ 60 fps | in-stream, présentation, master |
 
-```bash
-open repro/out/intendant_16x9.mp4
-cd repro && npx remotion studio      # composition "Intendant"
-```
+41,1 s. Plus de 9:16 : le fil est le seul placement visé.
+
+## Le 4:5 est une remise en page, pas un recadrage
+
+Le 16:9 reste le master, et c'est aussi le système d'unités du monde : les
+positions de caméra du travelling, le x monde de la rangée d'avis, l'écart entre
+stations ont tous été mesurés contre une fenêtre de 1920.
+
+Le 4:5 est rendu à **échelle 1:1** : une citation de 30 px fait 30 px dans les
+deux, une tuile de service 190 px dans les deux. **Rien n'est réduit.** Le cadre
+est simplement 840 px plus étroit et 270 px plus haut, donc le texte prend plus
+de lignes, les lignes larges sont reconstruites et les avis passent une carte à
+la fois. Réduire le 16:9 pour le faire tenir aurait mis le corps de texte à
+40 px, sous ce qu'exige un fil mobile : **remettre en page coûte du travail,
+réduire coûte de la lisibilité.**
+
+Les scènes lisent la fenêtre réelle via `useStage()` (`src/intendant/format.ts`).
+
+| Scène | Traitement en 4:5 |
+|---|---|
+| Horloge | cadran tenu à **r = 460** au lieu de suivre la largeur (il tomberait à 297) |
+| Navigateur | la page est une copie de la **scène**, donc fenêtre 4:5 |
+| « Un vrai métier » | **4 lignes courtes au lieu de 2 longues**, ce qui fait passer la typo à 80 px au lieu de 47 |
+| Parcours | colonne d'arrivée à 82 %, libellés **sous** la tuile, chiffre fantôme au-dessus |
+| Avis | **une carte de 900 px** à la fois — plus grande qu'en 16:9 |
+| Diffusion | lignes à 560 px pour dégager le losange |
+| Agenda | lignes re-proportionnées : 7 informations dans 940 px au lieu de 1780 |
+| « Nous gérons » | les deux membres **empilés**, typo conservée à 94 px |
+
+### Trois défauts trouvés en relecture
+
+| Défaut | Cause | Correction |
+|---|---|---|
+| Le losange recouvrait les lignes de plateformes | 0,72 du cadre place le losange à 778 en 1080, sur des lignes de 760 ; en 16:9 il est à 1382 et elles s'arrêtent à 856 | lignes à 560, décalées : **28 px de dégagement par construction** |
+| Libellés du parcours lisibles **0,80 s** contre 1,64 s en 16:9 | la révélation prenait 36 images sur les 87 de vie d'une station | colonne d'arrivée 60 % → **82 %** (plafond : au-delà le libellé déborde) et révélation démarrée dès l'entrée de la tuile → **1,36 s** |
+| Chiffre fantôme sous son libellé | en centrant les deux sous la tuile, la collision supprimée en 16:9 était réintroduite | chiffre au-dessus, vérifié aux trois positions de l'onde |
+
+### Le 16:9 est prouvé intact
+
+Tout est dérivé, jamais dupliqué : la caméra du travelling se calcule depuis la
+colonne d'arrivée (`cruiseBase = 700 − FRONT`), et les avis lisent leur position
+de départ depuis cette même caméra. Rejouées avec une largeur de 1920, les
+formules redonnent `FRONT = 1150`, `offset = −450`, `camX = 5568,6` et les
+5 stations à **0,00 px** — les valeurs exactes d'avant.
 
 ## Neuvième passage — l'aiguille des secondes, et le trou après le 5e service
 
