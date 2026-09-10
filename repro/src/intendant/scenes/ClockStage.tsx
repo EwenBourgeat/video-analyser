@@ -44,7 +44,16 @@ const Clock: React.FC<{frame: number}> = ({frame}) => {
    */
   const spinAt = (f: number) => {
     const t = Math.max(0, (f - 150) / 60);
-    const clockSeconds = 200 * t + 240 * t * t;
+    /**
+     * Eight times slower than it was. The old law reached 45 revolutions of the
+     * second hand PER SECOND by the end of the beat, and already ran at 3.3 at
+     * the start — past any speed a hand can be read at, so it stopped looking
+     * like a clock racing and started looking like a fault. It now opens at one
+     * revolution a second, which is legible, and accelerates to five.
+     *
+     * The gear ratios below are untouched: one quantity drives all three hands.
+     */
+    const clockSeconds = 60 * t + 23 * t * t;
     const sec = clockSeconds * 6;
     return {sec: sec + 40, min: sec / 60, hour: sec / 720 + 108};
   };

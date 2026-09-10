@@ -23,14 +23,14 @@ import {EASE} from '../../bezier';
  * here, which is exactly what the beat says.
  */
 
-const FROM = 1617;
-const TO = 1897;
+const FROM = 1552;
+const TO = 1832;
 /**
  * The rain waits until the mark is well past the middle and heading left — much
  * later than it used to start. It cannot wait for the mark to stop, though: the
  * rows are gone by then, and holding both back left twenty frames of empty page.
  */
-const HANDOVER = 1797;
+const HANDOVER = 1732;
 
 const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
 
@@ -41,8 +41,8 @@ const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
  * character — "pas assez fluide". It is now a single Bezier move: it leaves
  * slowly, crosses with real speed, and settles long on the left.
  */
-const HUB_FROM = 1713;
-const HUB_TO = 1825;
+const HUB_FROM = 1648;
+const HUB_TO = 1760;
 
 /**
  * The push-through. On the last 44 frames one booking card stops rising, centres
@@ -55,7 +55,7 @@ const HUB_TO = 1825;
  * made the two beats read as separate scenes rather than one continuous move.
  * The beat is 40 frames shorter as well, so the wait is now 72 frames.
  */
-const PUSH_FROM = 1853;
+const PUSH_FROM = 1788;
 /**
  * Which booking becomes the doorway — chosen by measurement, not by eye. At the
  * frame the push begins the six notes sit at y = -196, -59, 611, 543, 913 and
@@ -69,7 +69,7 @@ const HERO = 3;
 const HERO_SCALE = 14;
 
 const ROWS_X: [number, number][] = [
-  [1617, 96], [1709, 96], [1743, -220], [1775, -900], [1803, -1300], [1897, -1400],
+  [1552, 96], [1644, 96], [1678, -220], [1710, -900], [1738, -1300], [1832, -1400],
 ];
 
 const Spinner: React.FC<{size: number; frame: number}> = ({size, frame}) => (
@@ -182,7 +182,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
   // so the two scenes share one position at the cut
   const markY = H / 2 - 44 * (1 - hub);
   const rowsX = keyframes(frame, ROWS_X);
-  const rowsOut = 1 - prog(frame, 1779, 1805);
+  const rowsOut = 1 - prog(frame, 1714, 1740);
   const rain = prog(frame, HANDOVER, TO);
   const rainIn = EASE.entrance(prog(frame, HANDOVER, HANDOVER + 34));
   /**

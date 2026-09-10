@@ -1,6 +1,6 @@
 # L'Intendant — film de conciergerie
 
-Animation de 42,3 s pour **L'Intendant**, conciergerie de location courte durée à
+Animation de 41,2 s pour **L'Intendant**, conciergerie de location courte durée à
 Toulouse. Révisée d'après `Prompt.pdf`, `Prompt2.pdf`, `Prompt3.pdf`, `prompt4.pdf`,
 puis une nouvelle lecture image par image de la vidéo de référence.
 
@@ -8,13 +8,57 @@ puis une nouvelle lecture image par image de la vidéo de référence.
 
 | Fichier | Format |
 |---|---|
-| **`repro/out/intendant_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 42,3 s |
+| **`repro/out/intendant_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 41,2 s |
 | `repro/out/intendant_9x16.mp4` | 1080 × 1920 @ 60 fps |
 
 ```bash
 open repro/out/intendant_16x9.mp4
 cd repro && npx remotion studio      # composition "Intendant"
 ```
+
+## Neuvième passage — l'aiguille des secondes, et le trou après le 5e service
+
+### L'horloge tournait 45 tours par seconde
+
+Signalée comme « on dirait un bug » — et c'en était un, au sens mécanique.
+L'ancienne loi (`clockSeconds = 200t + 240t²`) donnait :
+
+| | Vitesse du trotteur |
+|---|---|
+| Début du beat | **3,3 tours/seconde** |
+| Milieu | 23 tours/s |
+| Fin | **45 tours/seconde** |
+
+Aucune aiguille n'est lisible à ces vitesses : ce n'était plus une horloge qui
+s'emballe, c'était un artefact. Sur le beat entier le trotteur faisait **125
+tours**.
+
+Nouvelle loi : **`clockSeconds = 60t + 23t²`**. Elle démarre à **1 tour/seconde**
+— lisible — et monte à 5, soit **15,6 tours sur le beat au lieu de 125**. Huit
+fois plus lent. Les rapports d'engrenage 720:60:1 sont inchangés, donc l'aiguille
+des minutes balaie toujours 93° et l'horloge reste cohérente avec elle-même.
+
+### Le trou entre le « Reporting mensuel » et les avis
+
+C'est une publicité : le temps mort est là où l'attention se perd. Le fouet
+démarre désormais **75 images plus tôt** (f1070 au lieu de f1145) et va plus vite
+(**44 px/image** au lieu de 34). La 5e étape n'est plus contemplée en train de
+sortir — dès son libellé posé, on repart.
+
+| Repère | Après le libellé du 5e service |
+|---|---|
+| Le fouet démarre | +0,23 s |
+| Cadre vide | +0,87 s |
+| Première carte d'avis | +1,07 s (vide de 0,20 s) |
+| **Cadre plein d'avis** | **+1,85 s** (contre +3,25 s) |
+
+**43 % de temps mort en moins.** Contrôles : raccord caméra **0,00 px**, 44,00
+px/image des deux côtés, accélération **0,0196** au démarrage du fouet (donc pas
+d'à-coup), et les 5 stations arrivent toujours à **0,0 px** — le fouet plus
+précoce ne les perturbe pas. À 44 px/image une carte de 560 px se déplace de 8 %
+de sa largeur par image : toujours pas de stroboscopie.
+
+Film à **2468 images = 41,2 s**.
 
 ## Huitième passage — du rythme, et un film qui se déplace au lieu d'additionner des scènes
 

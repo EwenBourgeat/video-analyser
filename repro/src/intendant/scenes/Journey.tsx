@@ -32,7 +32,7 @@ import {EASE} from '../../bezier';
  */
 
 const FROM = 684;
-const TO = 1185;
+const TO = 1120;
 
 /** Geometry, in master pixels, measured off the reference. */
 const X0 = 700;
@@ -64,26 +64,30 @@ const RAMP_IN = ARRIVE_0 - FROM;
  * ground where the reviews then build. The braking is placed late enough that
  * station 05 has finished leaving before it starts.
  */
-const RUSH_FROM = 1145;
+const RUSH_FROM = 1070;
 const RUSH = 40;
 /**
  * The camera does not slow at the end of the travelling — it SPEEDS UP, from
- * 12.3 px/frame to 34, and hands over to the reviews at that speed.
+ * 12.3 px/frame to 44, and hands over to the reviews at that speed.
  *
  * This is a whip: the camera rushes across the empty ground between the last
  * service and the first review, then decelerates onto the reviews on the far
  * side. It solves a problem that is arithmetic rather than aesthetic. A row of
  * cards entering from the right has to travel a full frame width — 1920 px —
  * before three of them are on screen. At the reviews' own 8 px/frame that takes
- * 240 frames, which is the entire four-second beat: the picture would only fill
- * on its last frame. At 34 the crossing takes 56 frames, and the frame is full
- * 1.1 s in with three seconds of readable drift left.
+ * 240 frames, the entire four-second beat: the picture would only fill on its
+ * last frame.
+ *
+ * The rush also starts EARLY — 14 frames after the fifth service's label has
+ * finished arriving, rather than ninety. The brief is an advertisement: the
+ * stretch between the last service and the first review was dead screen time,
+ * and dead screen time is where attention is lost.
  *
  * Speed costs nothing here because there is nothing on screen to look at, and
- * 34 px/frame moves a 560 px card by 6 % of its own width per frame, so it
+ * 44 px/frame moves a 560 px card by 8 % of its own width per frame, so it
  * neither strobes nor smears.
  */
-const RUSH_TO = 34;
+const RUSH_TO = 44;
 
 /**
  * Camera x. Constant through the stations, with velocity ramped from and back

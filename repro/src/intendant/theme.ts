@@ -73,14 +73,14 @@ export const T = {
   clock: {from: 150, to: 462},
   browser: {from: 300, to: 462},
   metier: {from: 466, to: 684},
-  journey: {from: 684, to: 1185},
-  reviews: {from: 1185, to: 1425},
-  key: {from: 1425, to: 1545},
-  logo: {from: 1545, to: 1617},
-  diffusion: {from: 1617, to: 1897},
-  calendar: {from: 1897, to: 2127},
-  simple: {from: 2127, to: 2287},
-  endcard: {from: 2287, to: 2533},
+  journey: {from: 684, to: 1120},
+  reviews: {from: 1120, to: 1360},
+  key: {from: 1360, to: 1480},
+  logo: {from: 1480, to: 1552},
+  diffusion: {from: 1552, to: 1832},
+  calendar: {from: 1832, to: 2062},
+  simple: {from: 2062, to: 2222},
+  endcard: {from: 2222, to: 2468},
 } as const;
 
-export const TOTAL_FRAMES = 2533; // 42,2 s
+export const TOTAL_FRAMES = 2468; // 41,1 s

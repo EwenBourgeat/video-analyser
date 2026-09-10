@@ -16,7 +16,7 @@ import {EASE} from '../../bezier';
  * beat read as a separate scene bolted on after the travelling.
  *
  * So there is no build and no hold. The camera comes off the five-step
- * travelling at 34 px/frame — it accelerates across the empty ground rather than
+ * travelling at 44 px/frame — it accelerates across the empty ground rather than
  * braking into it — and settles to 8 here. The cards are not animated at all:
  * they are objects standing in the world at x = R0 + i * PITCH, and the camera
  * passes them. Every arrival and every departure is a consequence of the camera
@@ -42,16 +42,16 @@ const PITCH = CARD_W + GAP;
 const ROW_Y = 536;
 
 /**
- * The camera arrives from the travelling at 34 px/frame — a whip across the
+ * The camera arrives from the travelling at 44 px/frame — a whip across the
  * empty ground — and settles to 8 over 110 frames. It never stops.
  *
  * The rush is arithmetic, not style. A row entering from the right must cross a
  * full 1920 px frame before three cards are on screen; at 8 px/frame that is 240
  * frames, the whole beat, so the picture would fill only on its last frame. The
- * whip crosses it in 56 and the frame is full 1.1 s in.
+ * whip crosses it in 44 and the frame is full 0.77 s in.
  */
-const CAM0 = 5851.1;
-const V_IN = 34;
+const CAM0 = 5568.6;
+const V_IN = 44;
 const V_OUT = 8;
 const SETTLE = 110;
 
@@ -63,7 +63,7 @@ const camXAt = (f: number) => {
   return CAM0 + SETTLE * (V_IN * u + (V_OUT - V_IN) * (u * u * u - (u * u * u * u) / 2));
 };
 /** World x of the first card: exactly the frame's right edge on the first frame. */
-const R0 = 7771;
+const R0 = 7489;
 
 type Review = {q: string; who: string; when: string; photo: string};
 
