@@ -135,14 +135,14 @@ export const MapPins: React.FC<{frame: number}> = ({frame}) => {
         <defs>
           <radialGradient id="cityFill">
             <stop offset="0%" stopColor="#FFFFFF" />
-            <stop offset="62%" stopColor="#FAFCFE" />
-            <stop offset="100%" stopColor="#E4EFFB" />
+            <stop offset="62%" stopColor="#FEFAF9" />
+            <stop offset="100%" stopColor="#FBE7E1" />
           </radialGradient>
           <filter id="sweepBlur" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation={r * 0.045} />
           </filter>
           <filter id="pinGlow" x="-160%" y="-160%" width="420%" height="420%">
-            <feDropShadow dx="0" dy="4" stdDeviation="7" floodColor="#1878EC" floodOpacity="0.28" />
+            <feDropShadow dx="0" dy="4" stdDeviation="7" floodColor="#941101" floodOpacity="0.28" />
           </filter>
           <clipPath id="cityClip">
             <circle cx={CX} cy={CY} r={r} />
@@ -163,7 +163,7 @@ export const MapPins: React.FC<{frame: number}> = ({frame}) => {
                 C ${CX - r * 0.4} ${CY + r * 0.30}, ${CX - r * 0.26} ${CY - r * 0.18}, ${CX + r * 0.16} ${CY - r * 0.52}
                 L ${CX + r * 0.30} ${CY - r * 1.1}`}
             fill="none"
-            stroke="#CBD8DC"
+            stroke="#E2CAC4"
             strokeWidth={r * 0.055}
             strokeLinecap="round"
           />

@@ -6,6 +6,63 @@ puis une nouvelle lecture image par image de la vidéo de référence.
 
 ## Livrables
 
+> **Branche `red-version`** — variante rouge de ce film. Le montage, les timings
+> et les animations sont **identiques à `main`** : seule la palette change.
+> Les rendus portent un nom distinct pour que la version bleue reste intacte
+> sur le disque.
+
+| Fichier | Format |
+|---|---|
+| **`repro/out/intendant_red_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 41,2 s |
+| `repro/out/intendant_red_9x16.mp4` | 1080 × 1920 @ 60 fps |
+
+### La palette rouge
+
+Références client : **`#941101`** (primaire) et **`#400106`** (fond sombre).
+
+`#941101` est en `hsl(7°, 99 %, 29 %)` — nettement plus sombre que le bleu qu'il
+remplace, qui était à 51 % de luminosité. Une bascule de teinte à luminosité
+constante aurait donc assombri tout le film. L'échelle est reconstruite en teinte
+7–16°, avec les luminosités ajustées **par rôle** :
+
+| Clé | Valeur | Rôle |
+|---|---|---|
+| `blue600` | **#941101** | la référence, telle quelle |
+| `blue500` | #AB1D07 | |
+| `blue450` | #BE290E | |
+| `blue400` | #D13415 | anneau du cadran, dégradés |
+| `blue350` | **#EA907B** | accent sur fond sombre |
+| `blue300` → `blueWash` | #EEA796 → #FDF5F2 | teintes claires |
+| `paperDark` | **#400106** | le fond sombre |
+
+**Le seul point qui a demandé un calcul :** `blue350` porte le texte d'accent sur
+fond sombre (« un vrai métier », « plus rien », « AVIS GOOGLE »). La valeur
+dérivée naïvement donnait un contraste WCAG de **4,94** contre les **7,18** de
+l'ancien accent bleu — le texte aurait été sensiblement moins lisible. La
+luminosité a été cherchée pour égaler ce contraste : `#EA907B` donne **7,16**.
+
+Les lueurs du fond sombre deviennent des braises (`rgba(198,58,32)` au cœur), les
+ombres portées passent de froides à chaudes, et les gris de l'encre sont
+réchauffés.
+
+### Non touché, volontairement
+
+- Le **G de Google** (`#4285F4`, `#34A853`, `#FBBC05`, `#EA4335`) et les
+  **étoiles ambre** (`#FBBC04`) : ce sont les marques de Google.
+- Les **pastilles macOS** de la fenêtre du navigateur.
+- Le **vert de validation** (`#16A34A`) : couleur sémantique, pas de thème. Sur
+  un film rouge ce complémentaire ressort fortement — à arbitrer si l'on préfère
+  une coche neutre ou rouge foncé.
+
+### Pourquoi les clés s'appellent encore `blue*`
+
+Elles contiennent des rouges. C'est délibéré : garder les noms fait de cette
+branche un **diff de couleurs pur** (8 fichiers, 58 insertions), qui peut suivre
+`main` sans conflit sur les quinze fichiers de scènes. Les renommer coûterait une
+cinquantaine d'éditions et rendrait tout rebase pénible.
+
+## Livrables de `main` (version bleue)
+
 | Fichier | Format |
 |---|---|
 | **`repro/out/intendant_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 41,2 s |

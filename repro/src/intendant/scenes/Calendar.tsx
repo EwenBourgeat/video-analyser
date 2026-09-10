@@ -154,9 +154,9 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
                 width: ROW_W,
                 height: 136,
                 borderRadius: 22,
-                background: '#FDFEFF',
+                background: '#FFFDFC',
                 border: `1px solid ${C.line}`,
-                boxShadow: '0 8px 22px rgba(20,50,90,0.06)',
+                boxShadow: '0 8px 22px rgba(70,12,6,0.06)',
                 display: 'flex',
                 alignItems: 'center',
                 paddingLeft: 30,
@@ -215,7 +215,7 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
                     boxShadow:
                       go > 0.5
                         ? '0 10px 26px rgba(22,163,74,0.34)'
-                        : '0 10px 26px rgba(24,120,236,0.32)',
+                        : '0 10px 26px rgba(148,17,1,0.32)',
                     transition: 'none',
                   }}
                 >

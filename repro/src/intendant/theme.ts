@@ -1,5 +1,16 @@
 /**
- * L'Intendant — conciergerie Airbnb, Toulouse.
+ * L'Intendant — conciergerie Airbnb, Toulouse.  ***BRANCHE red-version***
+ *
+ * ATTENTION AUX NOMS. Les clés s'appellent toujours `blue600`, `blue350`… mais
+ * elles contiennent des ROUGES sur cette branche. C'est délibéré : garder les
+ * noms fait de `red-version` un diff de couleurs pur, qui peut suivre `main`
+ * sans conflit sur les quinze fichiers de scènes. Les renommer coûterait une
+ * cinquantaine d'éditions et rendrait tout rebase pénible.
+ *
+ * Références client : #941101 (primaire) et #400106 (fond sombre). Le reste de
+ * l'échelle en est dérivé en teinte 7-16°, et `blue350` a été calé à un
+ * contraste de 7,16 sur le fond sombre pour égaler exactement le 7,18 qu'avait
+ * l'ancien accent bleu — c'est cette teinte qui porte le texte d'accent.
  *
  * Palette révisée : le brique/terracotta a été remplacé par le bleu, à la
  * demande du client (« un beau bleu moderne se rapprochant de l'autre
@@ -11,34 +22,34 @@
 export const C = {
   // grounds
   paper: '#FFFFFF',
-  paperSoft: '#F7FAFE',
-  paperDark: '#11171C',
+  paperSoft: '#FDF7F5',
+  paperDark: '#400106',
 
   // ink
-  ink: '#0B0B0C',
-  inkSoft: '#22222A',
-  muted: '#56565C',
-  inkDark: '#F4F6F8',
-  inkSoftDark: '#DCDDE0',
-  mutedDark: '#9AA1A8',
+  ink: '#120A09',
+  inkSoft: '#2A1B18',
+  muted: '#6B5450',
+  inkDark: '#FBF2EF',
+  inkSoftDark: '#E9D9D4',
+  mutedDark: '#B99B94',
 
   // rules
-  line: '#E4E9F0',
-  lineStrong: '#C9D3E0',
-  lineDark: '#242C34',
-  lineStrongDark: '#39434E',
+  line: '#F0E2DD',
+  lineStrong: '#DFC7C0',
+  lineDark: '#5A1A14',
+  lineStrongDark: '#7A2A20',
 
-  // blues, measured off the Scalead film
-  blue600: '#1878EC',
-  blue500: '#2E86F1',
-  blue450: '#4694F2',
-  blue400: '#4195F8',
-  blue350: '#5CA6FF',
-  blue300: '#83B8F8',
-  blue250: '#93C4FF',
-  blue150: '#C0DDFF',
-  blue050: '#DDECFD',
-  blueWash: '#EFF6FE',
+  // the red palette of this branch — see the note at the top of the file
+  blue600: '#941101',
+  blue500: '#AB1D07',
+  blue450: '#BE290E',
+  blue400: '#D13415',
+  blue350: '#EA907B',
+  blue300: '#EEA796',
+  blue250: '#F5BDAD',
+  blue150: '#FADBD1',
+  blue050: '#FCEDE8',
+  blueWash: '#FDF5F2',
 
   // the validation green asked for on the distribution beat
   green: '#16A34A',

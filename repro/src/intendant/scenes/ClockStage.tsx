@@ -102,12 +102,12 @@ const Clock: React.FC<{frame: number}> = ({frame}) => {
     <g transform={`translate(${cx} ${cy})`}>
       <defs>
         <linearGradient id="dialRing" x1="0" y1="0" x2="0.25" y2="1">
-          <stop offset="0%" stopColor="#5CA6FF" />
-          <stop offset="100%" stopColor="#1F6BC9" />
+          <stop offset="0%" stopColor="#D13415" />
+          <stop offset="100%" stopColor="#7A0D01" />
         </linearGradient>
       </defs>
       <circle r={r - ring / 2} fill="none" stroke="url(#dialRing)" strokeWidth={ring} />
-      <circle r={faceR} fill="#FDFEFF" />
+      <circle r={faceR} fill="#FFFDFC" />
       {Array.from({length: 12}, (_, i) => tick(i))}
       {subs.map((a, i) => (
         <g key={i} opacity={1 / (i + 1)}>
@@ -128,7 +128,7 @@ export const ClockStage: React.FC<{frame: number}> = ({frame}) => (
         position: 'absolute',
         inset: 0,
         background:
-          'radial-gradient(120% 80% at 50% 118%, rgba(163,74,56,0.07) 0%, rgba(250,249,246,0) 66%)',
+          'radial-gradient(120% 80% at 50% 118%, rgba(148,17,1,0.07) 0%, rgba(250,249,246,0) 66%)',
       }}
     />
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute'}}>
