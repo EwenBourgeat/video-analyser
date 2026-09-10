@@ -1,6 +1,6 @@
 # L'Intendant — film de conciergerie
 
-Animation de 48,5 s pour **L'Intendant**, conciergerie de location courte durée à
+Animation de 49,6 s pour **L'Intendant**, conciergerie de location courte durée à
 Toulouse. Révisée d'après `Prompt.pdf`, `Prompt2.pdf`, `Prompt3.pdf`, `prompt4.pdf`,
 puis une nouvelle lecture image par image de la vidéo de référence.
 
@@ -8,13 +8,81 @@ puis une nouvelle lecture image par image de la vidéo de référence.
 
 | Fichier | Format |
 |---|---|
-| **`repro/out/intendant_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 48,5 s |
+| **`repro/out/intendant_16x9.mp4`** | **1920 × 1080 @ 60 fps**, 49,6 s |
 | `repro/out/intendant_9x16.mp4` | 1080 × 1920 @ 60 fps |
 
 ```bash
 open repro/out/intendant_16x9.mp4
 cd repro && npx remotion studio      # composition "Intendant"
 ```
+
+## Septième passage — un seul plan continu, et un beat logo allégé
+
+### Le logo : le losange seul
+
+Le beat affichait le losange, puis « L'Intendant », puis
+« CONCIERGERIE · TOULOUSE ». C'est exactement ce que porte déjà la carte finale,
+donc l'information était dite deux fois — et c'est ce texte qui fixait la durée :
+2,33 s, le temps que deux lignes arrivent et se lisent. Sans rien à lire, le beat
+devient une ponctuation : **1,20 s**, le losange arrive, tient une respiration,
+part vers la droite.
+
+**Contrainte préservée :** la diffusion reprend la marque à `x = W × 0,72 = 1382`
+et `size = 300`. La dernière image du beat la pose à 1382 — écart mesuré
+**0,4 px**, sous-pixel. Un écart ici rouvrirait la coupe que ce passage n'a plus.
+
+### La coupure avant les avis a disparu
+
+`Journey` freinait à f1034, plongeait vers le haut et le film coupait sur
+`Reviews`. Désormais la caméra **continue vers la droite**, les 5 étapes sortent
+par la gauche, le cadre se vide, et les avis se construisent là.
+
+| Changement sur `Journey` | Pourquoi |
+|---|---|
+| Freinage repoussé de f1034 à **f1145** | la caméra dépasse largement l'étape 05 avant de ralentir |
+| **`PAN_Y` supprimé** | plus de plongeon : la caméra ne fait que translater |
+| Fil **borné à `PATH_END = 5040`** | c'était le verrou : le fil était dessiné jusqu'à `camX + 1150`, une colonne fixe **du cadre**, donc il restait à l'écran à toute position de caméra et le cadre ne pouvait jamais se vider |
+| `glow` ramené de 0,9 à **0,5** pendant l'approche | `Reviews` utilise 0,5 ; sans ça la luminosité du fond aurait sauté à la coupe |
+
+**Ce qui rend la coupe invisible.** Les deux scènes restent séparées, mais la
+coupe technique tombe **dans le vide** : à f1199, `Journey` n'a plus rien à
+l'écran et `Reviews` n'a encore rien dessiné. Deux cadres vides identiques de
+part et d'autre. C'est valide parce que les dégradés d'`Ink` sont fixés au cadre
+et non au monde : un cadre vide a le même aspect à n'importe quelle position de
+caméra.
+
+Le freinage est passé en **smoothstep** (`u − u³ + u⁴/2`) : la rampe de vitesse
+linéaire qui était en place faisait sauter l'accélération de 0 à −0,23 dès la
+première image. Même distance parcourue, donc aucun repère déplacé.
+
+### Mesuré sur le rendu
+
+| | Mesure |
+|---|---|
+| Variation de luminance **à la coupe** (f1199) | **0,0176** — plus faible que la variation ordinaire de la séquence (0,0225) |
+| Images 1199 → 1203 | **strictement identiques** (23,098) |
+| Arrivée des 5 stations | **0,0 px d'écart** — le freinage tardif ne les perturbe pas |
+| Accélération au freinage | **−0,004** aux deux extrémités (avant : −0,11) |
+| Vide réel | **0,92 s** (0,80 demandé — voir ci-dessous) |
+
+La coupe est statistiquement indistinguable d'une image ordinaire, et
+introuvable à l'œil sur la planche de contrôle.
+
+### Un écart assumé
+
+Le vide fait **0,92 s au lieu de 0,80** : mon estimation de la largeur du libellé
+de l'étape 05 était conservatrice de 6 images. Le resserrer imposerait de
+redécaler tout le film de 7 images pour gagner 0,12 s — du sur-ajustement, pas
+fait.
+
+### Décalage de la timeline
+
+**+135 images** jusqu'à `logo.from`, puis **+67** à partir de `diffusion` (le beat
+logo perdant 68 images). Film à **2977 images = 49,6 s**.
+
+Rappel pour la maintenance : les tables de `KeyRise` sont des paires
+`[image, valeur]` (`[1288, 910]` = image 1288, hauteur 910 px) — seul le premier
+élément se décale.
 
 ## Sixième passage — la scène des avis, refaite sans aucune chute
 
@@ -288,7 +356,7 @@ Dis-moi et je bascule.
 | 5 | Les 5 services, travelling | sombre |
 | 6 | Trois avis Google, puis le défilé | sombre |
 | 7 | La clé — « vous ne gérez plus rien » | sombre |
-| 8 | Révélation de la marque | blanc |
+| 8 | Le losange, seul, qui part vers la droite | blanc |
 | 9-10 | Diffusion 4 plateformes → pluie de réservations (continu) | blanc |
 | 11 | L'agenda : plan d'ensemble, puis clic « Confirmer » → vert | blanc |
 | 11b | « Nous gérons, vous percevez. » | blanc |

@@ -3,7 +3,7 @@ import {AbsoluteFill} from 'remotion';
 import {C, W, H, SANS} from '../theme';
 import {Ink} from '../components/Grounds';
 import {Glyph, GlyphName} from '../components/Glyphs';
-import {keyframes, prog} from '../../ease';
+import {prog} from '../../ease';
 import {EASE} from '../../bezier';
 
 /**
@@ -32,7 +32,7 @@ import {EASE} from '../../bezier';
  */
 
 const FROM = 684;
-const TO = 1064;
+const TO = 1199;
 
 /** Geometry, in master pixels, measured off the reference. */
 const X0 = 700;
@@ -58,8 +58,14 @@ const LABEL_LAG = 4;
 
 /** Velocity ramps, kept clear of every station so arrivals stay exact. */
 const RAMP_IN = ARRIVE_0 - FROM;
-const RAMP_OUT_FROM = 1034;
-const RAMP_OUT = 30;
+/**
+ * The camera no longer stops at the end of the stations and dives away. It keeps
+ * running right, the stations leave frame, and it comes to rest in the empty
+ * ground where the reviews then build. The braking is placed late enough that
+ * station 05 has finished leaving before it starts.
+ */
+const BRAKE_FROM = 1145;
+const BRAKE = 54;
 
 /**
  * Camera x. Constant through the stations, with velocity ramped from and back
@@ -73,21 +79,29 @@ const camXAt = (f: number) => {
     const u = Math.max(0, (f - FROM) / RAMP_IN);
     return cruise(ARRIVE_0) - (RATE * RAMP_IN * (1 - u * u)) / 2;
   }
-  if (f <= RAMP_OUT_FROM) return cruise(f);
-  // v(u) = RATE * (1 - u)
-  const u = Math.min(1, (f - RAMP_OUT_FROM) / RAMP_OUT);
-  return cruise(RAMP_OUT_FROM) + RATE * RAMP_OUT * (u - (u * u) / 2);
+  if (f <= BRAKE_FROM) return cruise(f);
+  /**
+   * Braking on a smoothstep: v(u) = RATE * (1 - (3u² - 2u³)), integrated to
+   * u - u³ + u⁴/2. A linear velocity ramp covers the same ground but steps the
+   * acceleration from 0 to its full value on the first frame and back on the
+   * last — a jerk at both ends of the brake. Here acceleration starts and ends
+   * at zero, which is what makes the camera settle rather than stop.
+   */
+  const u = Math.min(1, (f - BRAKE_FROM) / BRAKE);
+  return cruise(BRAKE_FROM) + RATE * BRAKE * (u - u * u * u + (u * u * u * u) / 2);
 };
-
-/** The scene dives away at the end, handing over to the review wall. */
-const PAN_Y: [number, number][] = [
-  [FROM, 0], [1012, 0], [1024, -30], [1036, -120], [1048, -320], [TO, -680],
-];
 
 const sineY = (x: number) => MID - AMP * Math.cos((Math.PI * (x - X0)) / SPACING);
 
 const PATH_X0 = X0 - SPACING * 1.4;
-const PATH_X1 = X0 + SPACING * 5.4;
+/**
+ * The thread now ENDS, a little past the last station, instead of running on to
+ * x = 5884. It used to be drawn up to `camX + FRONT`, which is a fixed column of
+ * the frame — so the thread was on screen at every camera position and the frame
+ * could never empty. The beat's whole hand-over depends on the frame emptying.
+ */
+const PATH_END = 5040;
+const PATH_X1 = PATH_END;
 const PATH_D = (() => {
   let d = '';
   for (let x = PATH_X0; x <= PATH_X1; x += 8) {
@@ -108,13 +122,20 @@ const STEPS: Step[] = [
 
 export const Journey: React.FC<{frame: number}> = ({frame}) => {
   const camX = camXAt(frame);
-  const camY = keyframes(frame, PAN_Y);
-  /** World x the thread has been drawn to — a fixed column, carried by the pan. */
-  const frontX = camX + FRONT;
+  // the dive that used to end this beat is gone: the camera only travels right
+  const camY = 0;
+  /** World x the thread has been drawn to, and never past its own end. */
+  const frontX = Math.min(camX + FRONT, PATH_END);
 
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
-      <Ink glow={0.9} />
+      {/*
+        The glow settles to 0.5 as the camera comes to rest, because that is what
+        the reviews beat uses. The cut lands on an empty frame, so nothing is
+        drawn on either side of it — but a mismatched ground would still have
+        made the background brightness jump at that exact frame.
+      */}
+      <Ink glow={0.9 - 0.4 * prog(frame, BRAKE_FROM, TO)} />
 
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute'}}>
         <defs>

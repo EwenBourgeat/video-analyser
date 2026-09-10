@@ -24,8 +24,8 @@ loadJetBrains('normal', {weights: ['400', '500', '600']});
 
 /** Radius of the disc that carries the calendar -> payoff transition. */
 const MORPH_R = (f: number) => {
-  if (f <= 2516) return 1400 * inCubic(prog(f, 2484, 2516));   // the pill floods out
-  return 1400 + (32 - 1400) * softOut(prog(f, 2520, 2578));    // and contracts to the badge
+  if (f <= 2583) return 1400 * inCubic(prog(f, 2551, 2583));   // the pill floods out
+  return 1400 + (32 - 1400) * softOut(prog(f, 2587, 2645));    // and contracts to the badge
 };
 
 const In: React.FC<{from: number; to: number; frame: number; children: React.ReactNode}> = ({
@@ -90,7 +90,7 @@ export const Intendant: React.FC = () => {
         contracts onto the check badge of the next line. The button becomes the
         badge — the transition is one object changing size, not a cut.
       */}
-      {frame >= 2484 && frame <= 2578 ? (
+      {frame >= 2551 && frame <= 2645 ? (
         <AbsoluteFill style={{pointerEvents: 'none'}}>
           <div
             style={{
@@ -112,7 +112,7 @@ export const Intendant: React.FC = () => {
                 left: 960,
                 top: 516,
                 transform: 'translate(-50%,-50%)',
-                opacity: prog(frame, 2560, 2572),
+                opacity: prog(frame, 2627, 2639),
               }}
             >
               <svg width={64} height={64} viewBox="0 0 40 40">
