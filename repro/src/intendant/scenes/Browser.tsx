@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, W, H} from '../theme';
+import {C} from '../theme';
+import {useStage} from '../format';
 import {ramp, inCubic, prog} from '../../ease';
 import {EASE} from '../../bezier';
 import {ClockStage} from './ClockStage';
@@ -25,9 +26,18 @@ const PULL_FROM = 300;
 const PULL_TO = 380;
 
 export const Browser: React.FC<{frame: number}> = ({frame}) => {
-  const pageW = ramp(frame, [PULL_FROM, PULL_TO], [1900, 1216], EASE.pullback);
-  const pageH = pageW / (16 / 9);
-  const pageTop = ramp(frame, [PULL_FROM, PULL_TO], [22, 236], EASE.pullback);
+  /*
+    The page inside the window is a scaled copy of the STAGE, not of the 16:9
+    master — so in 4:5 the window is 4:5 too and the clock beat inside it lays
+    itself out for that shape. Scaling a 1920-wide page into a 1080 frame would
+    have cut a third of it off.
+  */
+  const {w: W, h: H, tall} = useStage();
+  const FULL = tall ? W * 0.995 : 1900;
+  const SETTLED = tall ? W * 0.87 : 1216;
+  const pageW = ramp(frame, [PULL_FROM, PULL_TO], [FULL, SETTLED], EASE.pullback);
+  const pageH = pageW * (H / W);
+  const pageTop = ramp(frame, [PULL_FROM, PULL_TO], [22, (H - pageW * (H / W)) / 2], EASE.pullback);
   /**
    * The window has to be COMPLETELY out of frame before the cut, and it never
    * was: it slid down 780 px when 844 are needed to clear a 736 px-tall window
@@ -39,7 +49,7 @@ export const Browser: React.FC<{frame: number}> = ({frame}) => {
 
   const left = W / 2 - pageW / 2;
   const top = pageTop + exitY;
-  const k = pageW / 1216;
+  const k = pageW / SETTLED;
   const scale = pageW / W;
 
   const pauseP = prog(frame, 396, 424);

@@ -1,5 +1,6 @@
 import React from 'react';
-import {C, W, H, SANS} from '../theme';
+import {C, SANS} from '../theme';
+import {useStage, clockGeom} from '../format';
 import {ramp, prog} from '../../ease';
 import {EASE} from '../../bezier';
 import {Kinetic} from '../components/Type';
@@ -16,17 +17,19 @@ import {Kinetic} from '../components/Type';
  * the same treatment the Scalead clock needed once it ran at 60 fps.
  */
 
-const cyF = (f: number) =>
-  f <= 208 ? ramp(f, [150, 208], [0.84, 0.895], EASE.smooth) : 0.895;
-const rF = 0.275;
+/** The dial rises a little as it settles, in both frames. */
+const RISE = 0.055;
 
 // the second hand runs at its true ratio now, so it needs a real smear
 const SLICES = 13;
 
 const Clock: React.FC<{frame: number}> = ({frame}) => {
-  const cx = 0.5 * W;
-  const cy = cyF(frame) * H;
-  const r = rF * W;
+  const {w, h, tall} = useStage();
+  const dial = clockGeom(w, h, tall);
+  const cx = dial.cx;
+  // it settles upward onto its resting centre over the first second
+  const cy = ramp(frame, [150, 208], [dial.cy + RISE * h, dial.cy], EASE.smooth);
+  const r = dial.r;
   const ring = r * 0.075;
   const faceR = r - ring;
 
@@ -121,7 +124,9 @@ const Clock: React.FC<{frame: number}> = ({frame}) => {
   );
 };
 
-export const ClockStage: React.FC<{frame: number}> = ({frame}) => (
+export const ClockStage: React.FC<{frame: number}> = ({frame}) => {
+  const {w: W, h: H, tall} = useStage();
+  return (
   <div style={{position: 'absolute', inset: 0, background: C.paper, overflow: 'hidden'}}>
     <div
       style={{
@@ -135,12 +140,27 @@ export const ClockStage: React.FC<{frame: number}> = ({frame}) => (
       <Clock frame={frame} />
     </svg>
 
-    <div style={{position: 'absolute', left: 0, top: 0.2 * H, width: W, display: 'flex', justifyContent: 'center'}}>
+    {/*
+      In 4:5 the question sits higher (the dial is lower and larger there) and is
+      given a width to wrap inside: at 66 px the line runs about 1400 px, so in a
+      1080 frame it has to break. `Kinetic` reveals it the same way either way.
+    */}
+    <div
+      style={{
+        position: 'absolute',
+        left: 0,
+        top: tall ? 0.10 * H : 0.2 * H,
+        width: W,
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
       <Kinetic
         frame={frame}
         from={172}
         to={368}
         fontSize={66}
+        maxWidth={tall ? 940 : undefined}
         segments={[
           {text: 'combien d’heures ', accent: true},
           {text: 'passez-vous sur votre location ?'},
@@ -152,7 +172,7 @@ export const ClockStage: React.FC<{frame: number}> = ({frame}) => (
       style={{
         position: 'absolute',
         left: 0,
-        top: 0.2 * H + 96,
+        top: tall ? 0.10 * H + 210 : 0.2 * H + 96,
         width: W,
         textAlign: 'center',
         fontFamily: SANS,
@@ -166,4 +186,5 @@ export const ClockStage: React.FC<{frame: number}> = ({frame}) => (
       Messages, ménage, tarifs, imprévus.
     </div>
   </div>
-);
+  );
+};

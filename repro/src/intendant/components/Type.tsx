@@ -25,6 +25,8 @@ export const Kinetic: React.FC<{
   weight?: number;
   unit?: 'char' | 'word';
   letterSpacing?: string;
+  /** Set to let the line wrap inside this width — needed in the 4:5 frame. */
+  maxWidth?: number;
   style?: React.CSSProperties;
 }> = ({
   segments,
@@ -36,6 +38,7 @@ export const Kinetic: React.FC<{
   weight = 600,
   unit = 'char',
   letterSpacing = '-0.028em',
+  maxWidth,
   style,
 }) => {
   const ink = tone === 'dark' ? C.inkDark : C.ink;
@@ -63,14 +66,23 @@ export const Kinetic: React.FC<{
         fontSize,
         letterSpacing,
         lineHeight: 1.14,
-        whiteSpace: 'nowrap',
+        // one line by default; given a width, it breaks inside it instead
+        whiteSpace: maxWidth ? 'normal' : 'nowrap',
+        maxWidth,
+        textAlign: maxWidth ? 'center' : undefined,
         ...style,
       }}
     >
       {toks.map((tok, i) => {
         if (tok.space) {
           return (
-            <span key={i} style={{whiteSpace: 'pre'}}>
+            /*
+              `pre` keeps the space from collapsing but also forbids breaking at
+              it — so when the line is allowed to wrap, the spaces have to be
+              `pre-wrap`, which preserves them AND leaves the break opportunity.
+              Without this the text simply overflows the width it was given.
+            */
+            <span key={i} style={{whiteSpace: maxWidth ? 'pre-wrap' : 'pre'}}>
               {tok.text}
             </span>
           );

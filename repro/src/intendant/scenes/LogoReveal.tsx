@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {W, H} from '../theme';
+import {useStage} from '../format';
 import {Paper} from '../components/Grounds';
 import {Mark} from '../components/Brand';
 import {ramp, softOut, softOutQuint, prog} from '../../ease';
@@ -32,7 +32,8 @@ const MARK = 300;
  * W * 0.72), fully settled before the last frame of the beat. Change these and
  * the seam between the two scenes reopens.
  */
-const DRIFT_TO = 422;
+/** 0.72 of the frame minus its centre — the point the next beat picks up. */
+const driftTo = (w: number) => w * 0.72 - w / 2;
 const DRIFT_FROM_F = FROM + 32;
 const DRIFT_TO_F = FROM + 70;
 
@@ -40,8 +41,10 @@ export const LogoReveal: React.FC<{frame: number}> = ({frame}) => {
   const e = softOutQuint(prog(frame, FROM, FROM + 28));
   const scale = 0.08 + 0.92 * e;
   const rot = -38 * (1 - e);
+  const {w: W, h: H} = useStage();
   const cx = W / 2;
   const cy = H / 2 - 44;
+  const DRIFT_TO = driftTo(W);
   const driftX = ramp(frame, [DRIFT_FROM_F, DRIFT_TO_F], [0, DRIFT_TO], softOut);
 
   return (

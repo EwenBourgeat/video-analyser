@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, W, H} from '../theme';
+import {C} from '../theme';
+import {useStage} from '../format';
 import {Ink} from '../components/Grounds';
 import {Kinetic} from '../components/Type';
 import {keyframes} from '../../ease';
@@ -31,6 +32,7 @@ const TOP: [number, number][] = [
 export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
   const s = keyframes(frame, SCALE);
   const top = keyframes(frame, TOP);
+  const {w: W, h: H, tall} = useStage();
   const cx = W / 2;
 
   return (
@@ -76,7 +78,8 @@ export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
           frame={frame}
           from={FROM + 13}
           to={FROM + 77}
-          fontSize={96}
+          fontSize={tall ? 88 : 96}
+          maxWidth={tall ? 900 : undefined}
           tone="dark"
           segments={[{text: 'vous ne gérez '}, {text: 'plus rien', accent: true}]}
         />

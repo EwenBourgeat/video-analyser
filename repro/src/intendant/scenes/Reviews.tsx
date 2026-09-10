@@ -1,6 +1,8 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
-import {C, W, H, SANS, MONO, T} from '../theme';
+import {C, SANS, MONO, T} from '../theme';
+import {useStage} from '../format';
+import {camXAt} from './Journey';
 import {Ink} from '../components/Grounds';
 import {prog} from '../../ease';
 import {EASE} from '../../bezier';
@@ -34,12 +36,19 @@ import {EASE} from '../../bezier';
 const FROM = T.reviews.from;
 const TO = T.reviews.to;
 
-/** Row geometry, unchanged. */
-const CARD_W = 560;
-const CARD_H = 302;
-const GAP = 64;
-const PITCH = CARD_W + GAP;
-const ROW_Y = 536;
+/**
+ * Row geometry per frame.
+ *
+ * 16:9 shows three cards of 560 side by side. 1 080 px only holds one and a
+ * half of those, so 4:5 shows ONE card at a time at 900 — bigger than in the
+ * wide cut, not smaller. The drift is unchanged in character: a supply of
+ * reviews passing right to left, just one at a time instead of three.
+ */
+const geom = (tall: boolean) => {
+  const cardW = tall ? 900 : 560;
+  const gap = tall ? 60 : 64;
+  return {cardW, cardH: tall ? 340 : 302, gap, pitch: cardW + gap, rowY: tall ? 640 : 536};
+};
 
 /**
  * The camera arrives from the travelling at 44 px/frame — a whip across the
@@ -50,20 +59,28 @@ const ROW_Y = 536;
  * frames, the whole beat, so the picture would fill only on its last frame. The
  * whip crosses it in 44 and the frame is full 0.77 s in.
  */
-const CAM0 = 5568.6;
 const V_IN = 44;
 const V_OUT = 8;
 const SETTLE = 110;
 
-const camXAt = (f: number) => {
+/**
+ * Where the camera stands on this beat's first frame — read from the travelling
+ * itself rather than copied as a number, so the two beats cannot drift apart in
+ * either frame. It used to be the literal 5568.6, correct only for 16:9.
+ */
+const cam0Of = (w: number, tall: boolean) => camXAt(FROM, w, tall);
+
+const camAt = (f: number, w: number, tall: boolean) => {
+  const cam0 = cam0Of(w, tall);
   const t = f - FROM;
   const full = SETTLE * (V_IN + (V_OUT - V_IN) * 0.5);
-  if (t >= SETTLE) return CAM0 + full + (t - SETTLE) * V_OUT;
+  if (t >= SETTLE) return cam0 + full + (t - SETTLE) * V_OUT;
   const u = t / SETTLE;
-  return CAM0 + SETTLE * (V_IN * u + (V_OUT - V_IN) * (u * u * u - (u * u * u * u) / 2));
+  return cam0 + SETTLE * (V_IN * u + (V_OUT - V_IN) * (u * u * u - (u * u * u * u) / 2));
 };
+
 /** World x of the first card: exactly the frame's right edge on the first frame. */
-const R0 = 7489;
+const r0Of = (w: number, tall: boolean) => cam0Of(w, tall) + w;
 
 type Review = {q: string; who: string; when: string; photo: string};
 
@@ -83,7 +100,7 @@ const REVIEWS: Review[] = [
   {q: 'Je recommande sans hésiter.', who: 'Sophie Girard', when: 'il y a 1 an', photo: 'p08'},
 ];
 
-const LOOP = REVIEWS.length * PITCH;
+
 
 const GoogleG: React.FC<{size: number}> = ({size}) => (
   <svg width={size} height={size} viewBox="0 0 48 48">
@@ -105,14 +122,20 @@ const Stars: React.FC = () => (
 );
 
 /** One card. Nothing animates inside it — only its x, and that comes from the camera. */
-const Card: React.FC<{r: Review; x: number}> = ({r, x}) => (
+const Card: React.FC<{r: Review; x: number; cardW: number; cardH: number; rowY: number}> = ({
+  r,
+  x,
+  cardW,
+  cardH,
+  rowY,
+}) => (
   <div
     style={{
       position: 'absolute',
       left: x,
-      top: ROW_Y,
-      width: CARD_W,
-      height: CARD_H,
+      top: rowY,
+      width: cardW,
+      height: cardH,
       borderRadius: 30,
       background: C.paper,
       boxShadow: '0 18px 44px rgba(0,0,0,0.34)',
@@ -155,7 +178,11 @@ const Card: React.FC<{r: Review; x: number}> = ({r, x}) => (
 );
 
 export const Reviews: React.FC<{frame: number}> = ({frame}) => {
-  const camX = camXAt(frame);
+  const {w: W, h: H, tall} = useStage();
+  const g = geom(tall);
+  const LOOP = REVIEWS.length * g.pitch;
+  const R0 = r0Of(W, tall);
+  const camX = camAt(frame, W, tall);
 
   const kicker = EASE.entrance(prog(frame, FROM + 26, FROM + 46));
   const title = EASE.entrance(prog(frame, FROM + 32, FROM + 56));
@@ -174,7 +201,7 @@ export const Reviews: React.FC<{frame: number}> = ({frame}) => {
         style={{
           position: 'absolute',
           left: 0,
-          top: 232,
+          top: tall ? 268 : 232,
           width: W,
           textAlign: 'center',
           fontFamily: MONO,
@@ -192,12 +219,12 @@ export const Reviews: React.FC<{frame: number}> = ({frame}) => {
         style={{
           position: 'absolute',
           left: 0,
-          top: 292,
+          top: tall ? 328 : 292,
           width: W,
           textAlign: 'center',
           fontFamily: SANS,
           fontWeight: 600,
-          fontSize: 76,
+          fontSize: tall ? 62 : 76,
           letterSpacing: '-0.03em',
           color: C.inkDark,
           opacity: title * out,
@@ -210,10 +237,12 @@ export const Reviews: React.FC<{frame: number}> = ({frame}) => {
       <div style={{position: 'absolute', inset: 0, opacity: out}}>
         {REVIEWS.map((r, i) => {
           // wrap so the row can never run out of cards
-          let x = R0 + i * PITCH - camX;
-          while (x < -CARD_W - GAP) x += LOOP;
-          if (x > W + GAP) return null;
-          return <Card key={i} r={r} x={x} />;
+          let x = R0 + i * g.pitch - camX;
+          while (x < -g.cardW - g.gap) x += LOOP;
+          if (x > W + g.gap) return null;
+          return (
+            <Card key={i} r={r} x={x} cardW={g.cardW} cardH={g.cardH} rowY={g.rowY} />
+          );
         })}
       </div>
       {void H}

@@ -9,6 +9,7 @@ import {
   FPS as IFPS,
   TOTAL_FRAMES as ITOTAL,
 } from './intendant/theme';
+import {PW, PH} from './intendant/format';
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -27,6 +28,19 @@ export const RemotionRoot: React.FC = () => (
       fps={IFPS}
       width={IW}
       height={IH}
+    />
+    {/*
+      The feed cut. Same component, same timeline, same pixel scale — the scenes
+      read the real viewport through useStage() and lay themselves out for it.
+      See format.ts for why this is a re-layout and not a crop.
+    */}
+    <Composition
+      id="Intendant45"
+      component={Intendant}
+      durationInFrames={ITOTAL}
+      fps={IFPS}
+      width={PW}
+      height={PH}
     />
   </>
 );

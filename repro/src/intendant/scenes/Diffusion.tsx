@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, W, H, SANS, MONO} from '../theme';
+import {C, SANS, MONO} from '../theme';
+import {useStage} from '../format';
 import {Paper} from '../components/Grounds';
 import {Mark} from '../components/Brand';
 import {keyframes, prog} from '../../ease';
@@ -173,6 +174,23 @@ const mix = (a: string, b: string, t: number) => {
 };
 
 export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
+  const {w: W, h: H, tall} = useStage();
+  /*
+    The booking notes are scattered around x = 1140-1420 in 16:9, which is off
+    the right edge of a 1080 frame. In 4:5 they are re-scattered about the centre
+    and tightened, since there is less width to spread across.
+  */
+  const noteX = (x: number) => (tall ? W / 2 + (x - 1280) * 0.42 : x);
+
+  /*
+    The mark is handed over from the logo beat at 0.72 of the frame, which in
+    1080 puts it at 778 — straight on top of a 760-wide platform row starting at
+    96. In 16:9 the same fraction is 1382 and the rows end at 856, so they never
+    met. The rows are narrowed and shifted left in 4:5 so the two keep clear of
+    each other by construction rather than by luck.
+  */
+  const ROW_W = tall ? 560 : 760;
+  const ROW_X = tall ? -56 : 0;
   const hub = EASE.camera(prog(frame, HUB_FROM, HUB_TO));
   const hubX = W * 0.72 + (W * 0.27 - W * 0.72) * hub;
   // the mark carries over from the logo beat at the size it ended on
@@ -222,7 +240,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
           <div
             style={{
               position: 'absolute',
-              left: rowsX,
+              left: rowsX + ROW_X,
               top: H / 2,
               transform: 'translateY(-50%)',
               display: 'flex',
@@ -241,17 +259,17 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    width: 760,
-                    height: 122,
-                    paddingLeft: 44,
-                    paddingRight: 34,
+                    width: ROW_W,
+                    height: tall ? 104 : 122,
+                    paddingLeft: tall ? 30 : 44,
+                    paddingRight: tall ? 24 : 34,
                     borderRadius: 22,
                     background: C.paper,
                     border: `1px solid ${C.line}`,
                     boxShadow: '0 16px 40px rgba(70,12,6,0.10)',
                     fontFamily: SANS,
                     fontWeight: 500,
-                    fontSize: 46,
+                    fontSize: tall ? 36 : 46,
                     letterSpacing: '-0.02em',
                     color: C.ink,
                     opacity: inP,
@@ -260,9 +278,9 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
                 >
                   <span>{d}</span>
                   {done > 0 ? (
-                    <Tick size={80} p={done} />
+                    <Tick size={tall ? 58 : 80} p={done} />
                   ) : (
-                    <Spinner size={80} frame={frame - FROM} />
+                    <Spinner size={tall ? 58 : 80} frame={frame - FROM} />
                   )}
                 </div>
               );
@@ -271,11 +289,12 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
           <div
             style={{
               position: 'absolute',
-              left: rowsX,
-              top: H / 2 + 330,
+              left: rowsX + ROW_X,
+              top: H / 2 + (tall ? 258 : 330),
               fontFamily: SANS,
               fontWeight: 400,
-              fontSize: 32,
+              fontSize: tall ? 24 : 32,
+              width: tall ? ROW_W : undefined,
               color: C.muted,
               opacity: EASE.entrance(prog(frame, FROM + 100, FROM + 136)) * rowsOut,
             }}
@@ -288,7 +307,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
       {/* the bookings start dropping as the rows leave — no cut between them */}
       {rain > 0
         ? NOTES.filter((_, i) => i !== HERO).map(([p, a, x, y, s, sp], i) => (
-            <Note key={i} p={p} a={a} x={x} y={y - rain * 1270 * sp} s={s} o={rainIn} />
+            <Note key={i} p={p} a={a} x={noteX(x)} y={y - rain * 1270 * sp} s={s} o={rainIn} />
           ))
         : null}
 
@@ -311,7 +330,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
               <Note
                 p={hp}
                 a={ha}
-                x={hx + (W / 2 - hx) * centre}
+                x={noteX(hx) + (W / 2 - noteX(hx)) * centre}
                 y={(hy - rain * 1270 * hsp) * (1 - centre) + (H / 2) * centre}
                 s={hs + (HERO_SCALE - hs) * push}
                 o={rainIn}

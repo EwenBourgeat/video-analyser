@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
-import {C, W, H, SANS, MONO, T} from '../theme';
+import {C, SANS, MONO, T} from '../theme';
+import {useStage} from '../format';
 import {Paper} from '../components/Grounds';
 import {prog} from '../../ease';
 import {EASE} from '../../bezier';
@@ -60,7 +61,6 @@ const ROWS: Row[] = [
   {when: '16 — 20 avril', nights: '4 nuits', who: 'Hugo P.', platform: 'Airbnb', amount: '388 €', photo: 'p06'},
 ];
 
-const PITCH = 176;
 const BTN_ROW = 2;
 
 /**
@@ -72,7 +72,6 @@ const BTN_ROW = 2;
  * full.
  */
 const RIGHT_MARGIN = 150;
-const TARGET_Y = H / 2;
 
 /**
  * The beat opens INSIDE the booking card that flooded the frame at the end of
@@ -85,6 +84,25 @@ const ARRIVE = 34;
 const VEIL = 14;
 
 export const Calendar: React.FC<{frame: number}> = ({frame}) => {
+  const {w: W, h: H, tall} = useStage();
+  const TARGET_Y = H / 2;
+
+  /**
+   * A booking row is 1 780 px wide in 16:9 and its contents were laid out for
+   * that: avatar, guest, platform, dates, nights, payout, button. A 1 080 frame
+   * gives the row 940 px, so in 4:5 every element is re-proportioned rather than
+   * scaled — the type drops a few points, the columns lose their generous
+   * minimums and the button narrows, which keeps all seven pieces of information
+   * on the row instead of dropping any.
+   */
+  const S = tall
+    ? {avatar: 60, gap: 18, padX: 26, name: 28, sub: 21, nameMin: 150, when: 27,
+       whenMin: 200, amount: 32, btnW: 190, btnH: 74, btnFont: 27, rowH: 120,
+       pitch: 156, rightMargin: 56, cursor: 150}
+    : {avatar: 72, gap: 26, padX: 30, name: 34, sub: 25, nameMin: 300, when: 32,
+       whenMin: 340, amount: 40, btnW: 300, btnH: 84, btnFont: 34, rowH: 136,
+       pitch: 176, rightMargin: RIGHT_MARGIN, cursor: 190};
+  const PITCH = S.pitch;
   // out of the card, then the held wide shot, then the slow push-in to the click
   const arrive = EASE.camera(prog(frame, FROM, FROM + ARRIVE));
   const wide = 0.8 + (0.62 - 0.8) * arrive;
@@ -94,11 +112,11 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
   // solved from the row's own box model, so the pointer cannot miss it
   const ROW_L = 70;
   const ROW_W = W - 140;
-  const BTN_WX = ROW_L + ROW_W - 30 - 150;
-  const BTN_WY = BTN_ROW * PITCH + 68;
+  const BTN_WX = ROW_L + ROW_W - S.padX - S.btnW / 2;
+  const BTN_WY = BTN_ROW * PITCH + S.rowH / 2;
 
   // the two values that hold the row's right edge and the pressed row in frame
-  const panLock = ROW_L + ROW_W - W / 2 - (W - RIGHT_MARGIN - W / 2) / zoom;
+  const panLock = ROW_L + ROW_W - W / 2 - (W - S.rightMargin - W / 2) / zoom;
   const scrollLock = BTN_WY - H / 2 - (TARGET_Y - H / 2) / zoom;
   const conv = EASE.smooth(prog(frame, ZOOM_FROM, CLICK - 10));
   const panX = panLock * conv;
@@ -120,7 +138,7 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
   // pointer, projected through the same transform as the rows
   const btnX = W / 2 + zoom * (BTN_WX - W / 2 - panX);
   const btnY = H / 2 + zoom * (BTN_WY - H / 2 - scroll);
-  const CUR = 190;
+  const CUR = S.cursor;
   const tipX = (CUR * 5) / 44;
   const tipY = (CUR * 1.32 * 3) / 58;
   const travel = EASE.entrance(prog(frame, ZOOM_FROM + 10, CLICK));
@@ -152,16 +170,16 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
                 left: ROW_L,
                 top: i * PITCH,
                 width: ROW_W,
-                height: 136,
+                height: S.rowH,
                 borderRadius: 22,
                 background: '#FFFDFC',
                 border: `1px solid ${C.line}`,
                 boxShadow: '0 8px 22px rgba(70,12,6,0.06)',
                 display: 'flex',
                 alignItems: 'center',
-                paddingLeft: 30,
-                paddingRight: 30,
-                gap: 26,
+                paddingLeft: S.padX,
+                paddingRight: S.padX,
+                gap: S.gap,
                 fontFamily: SANS,
                 opacity: p,
                 transform: `translateY(${(1 - p) * 30}px)`,
@@ -169,19 +187,19 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
             >
               <Img
                 src={staticFile(`people/${r.photo}.jpg`)}
-                style={{width: 72, height: 72, borderRadius: '50%', objectFit: 'cover'}}
+                style={{width: S.avatar, height: S.avatar, borderRadius: '50%', objectFit: 'cover'}}
               />
-              <div style={{minWidth: 300}}>
-                <div style={{fontWeight: 600, fontSize: 34, color: C.ink}}>{r.who}</div>
-                <div style={{fontWeight: 400, fontSize: 25, color: C.muted, marginTop: 2}}>
+              <div style={{minWidth: S.nameMin}}>
+                <div style={{fontWeight: 600, fontSize: S.name, color: C.ink}}>{r.who}</div>
+                <div style={{fontWeight: 400, fontSize: S.sub, color: C.muted, marginTop: 2}}>
                   {r.platform}
                 </div>
               </div>
-              <div style={{minWidth: 340}}>
-                <div style={{fontFamily: MONO, fontWeight: 500, fontSize: 32, color: C.inkSoft}}>
+              <div style={{minWidth: S.whenMin}}>
+                <div style={{fontFamily: MONO, fontWeight: 500, fontSize: S.when, color: C.inkSoft}}>
                   {r.when}
                 </div>
-                <div style={{fontWeight: 400, fontSize: 25, color: C.muted, marginTop: 2}}>
+                <div style={{fontWeight: 400, fontSize: S.sub, color: C.muted, marginTop: 2}}>
                   {r.nights}
                 </div>
               </div>
@@ -190,9 +208,9 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
                   marginLeft: 'auto',
                   fontFamily: MONO,
                   fontWeight: 500,
-                  fontSize: 40,
+                  fontSize: S.amount,
                   color: C.blue600,
-                  marginRight: isBtn ? 34 : 0,
+                  marginRight: isBtn ? S.gap : 0,
                 }}
               >
                 {r.amount}
@@ -200,13 +218,13 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
               {isBtn ? (
                 <div
                   style={{
-                    width: 300,
-                    height: 84,
-                    borderRadius: 42,
+                    width: S.btnW,
+                    height: S.btnH,
+                    borderRadius: S.btnH / 2,
                     background: btnBg,
                     color: C.paper,
                     fontWeight: 500,
-                    fontSize: 34,
+                    fontSize: S.btnFont,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
