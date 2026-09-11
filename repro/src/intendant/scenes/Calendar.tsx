@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
-import {C, SANS, MONO, T} from '../theme';
+import {C, SANS, MONO, T, W_MED, W_BOLD} from '../theme';
 import {useStage} from '../format';
 import {Paper} from '../components/Grounds';
 import {prog} from '../../ease';
@@ -190,8 +190,8 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
                 style={{width: S.avatar, height: S.avatar, borderRadius: '50%', objectFit: 'cover'}}
               />
               <div style={{minWidth: S.nameMin}}>
-                <div style={{fontWeight: 600, fontSize: S.name, color: C.ink}}>{r.who}</div>
-                <div style={{fontWeight: 400, fontSize: S.sub, color: C.muted, marginTop: 2}}>
+                <div style={{fontWeight: W_BOLD, fontSize: S.name, color: C.ink}}>{r.who}</div>
+                <div style={{fontWeight: W_MED, fontSize: S.sub, color: C.muted, marginTop: 2}}>
                   {r.platform}
                 </div>
               </div>
@@ -199,7 +199,7 @@ export const Calendar: React.FC<{frame: number}> = ({frame}) => {
                 <div style={{fontFamily: MONO, fontWeight: 500, fontSize: S.when, color: C.inkSoft}}>
                   {r.when}
                 </div>
-                <div style={{fontWeight: 400, fontSize: S.sub, color: C.muted, marginTop: 2}}>
+                <div style={{fontWeight: W_MED, fontSize: S.sub, color: C.muted, marginTop: 2}}>
                   {r.nights}
                 </div>
               </div>

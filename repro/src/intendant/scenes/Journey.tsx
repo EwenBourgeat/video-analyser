@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SANS} from '../theme';
+import {C, SANS, W_MED, W_BOLD} from '../theme';
 import {useStage, frontOf, cruiseBase} from '../format';
 import {Ink} from '../components/Grounds';
 import {Glyph, GlyphName} from '../components/Glyphs';
@@ -33,7 +33,7 @@ import {EASE} from '../../bezier';
  */
 
 const FROM = 684;
-const TO = 1120;
+const TO = 964;
 
 /** Geometry, in master pixels, measured off the reference. */
 const X0 = 700;
@@ -84,7 +84,7 @@ const RAMP_IN = ARRIVE_0 - FROM;
  * ground where the reviews then build. The braking is placed late enough that
  * station 05 has finished leaving before it starts.
  */
-const RUSH_FROM = 1070;
+const RUSH_FROM = 914;
 const RUSH = 40;
 /**
  * The camera does not slow at the end of the travelling — it SPEEDS UP, from
@@ -161,12 +161,20 @@ const PATH_D = (() => {
 
 type Step = {n: string; glyph: GlyphName; label: string[]; below: boolean};
 
+/**
+ * Three services, not five.
+ *
+ * The three kept are the ones that describe the WORK: the listing goes up, the
+ * guests are handled, the property is kept. Tarification dynamique and Reporting
+ * mensuel were dropped not because they matter less but because the film already
+ * makes the money argument twice over — the calendar shows the payouts and the
+ * payoff line is "Nous gérons, vous percevez". Repeating it here spent two
+ * stations on something already said.
+ */
 const STEPS: Step[] = [
   {n: '01', glyph: 'camera', label: ['Annonce et', 'photos'], below: false},
-  {n: '02', glyph: 'chart', label: ['Tarification', 'dynamique'], below: true},
-  {n: '03', glyph: 'key', label: ['Accueil', '7 j / 7'], below: false},
-  {n: '04', glyph: 'sparkle', label: ['Ménage', 'hôtelier'], below: true},
-  {n: '05', glyph: 'report', label: ['Reporting', 'mensuel'], below: false},
+  {n: '02', glyph: 'key', label: ['Accueil', '7 j / 7'], below: true},
+  {n: '03', glyph: 'sparkle', label: ['Ménage', 'hôtelier'], below: false},
 ];
 
 export const Journey: React.FC<{frame: number}> = ({frame}) => {
@@ -274,7 +282,9 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
                 transform: `scale(${0.5 + 0.5 * e})`,
               }}
             >
-              <Glyph name={s.glyph} size={TILE * 0.52} color={C.blue600} />
+              {/* the mark's own dark ink, not the brand colour: at full saturation the
+                  symbol fought the tile it sits in and read as an alert */}
+              <Glyph name={s.glyph} size={TILE * 0.52} color={C.inkSoft} />
             </div>
             <div
               style={{
@@ -291,7 +301,7 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
                   ? sy + TILE * 0.66
                   : s.below ? sy + TILE * 0.72 : sy - TILE * 0.30 - 68 * s.label.length,
                 fontFamily: SANS,
-                fontWeight: 600,
+                fontWeight: W_BOLD,
                 fontSize: 54,
                 lineHeight: 1.16,
                 letterSpacing: '-0.028em',

@@ -78,9 +78,31 @@ export const SRC_FPS = 60;
 export const FPS = 60;
 export const SPF = 1;
 
-export const SANS = "'Instrument Sans', system-ui, sans-serif";
-export const MONO = "'JetBrains Mono', ui-monospace, monospace";
-export const SERIF = "'Playfair Display', Georgia, serif";
+/**
+ * The brand's two typefaces, from the client's charter: Didot and Futura.
+ *
+ * Neither exists on Google Fonts — they are licensed faces — but both ship with
+ * macOS, so headless Chrome resolves them directly and the film gets the real
+ * charter rather than lookalikes. The trade is portability: rendered on a
+ * machine without them, the fallbacks below take over and the metrics shift.
+ * Rendering happens on this Mac, so that is an accepted, documented risk rather
+ * than a hidden one. The fallbacks are chosen to be the nearest in shape —
+ * Bodoni for the didone, a geometric grotesque for Futura — so a stray render
+ * degrades rather than collapses.
+ *
+ * WEIGHTS. macOS Futura ships Medium and Bold only: there is no Regular and no
+ * Light. Asking for 400 or 600 makes the browser synthesise, which smears the
+ * geometry. Use 500 and 700 — the two constants below exist so that rule is
+ * applied rather than remembered.
+ */
+export const SANS = "Futura, 'Jost', 'Century Gothic', system-ui, sans-serif";
+export const SERIF = "Didot, 'Bodoni Moda', 'Didot LT STD', Georgia, serif";
+/** Figures in tables and amounts. Same family — the charter has two faces. */
+export const MONO = SANS;
+
+/** The only two Futura weights that exist; anything else is synthesised. */
+export const W_MED = 500;
+export const W_BOLD = 700;
 
 /**
  * Beat boundaries, in frames at 60 fps — the single source of truth. Every
@@ -96,14 +118,14 @@ export const T = {
   clock: {from: 150, to: 462},
   browser: {from: 300, to: 462},
   metier: {from: 466, to: 684},
-  journey: {from: 684, to: 1120},
-  reviews: {from: 1120, to: 1360},
-  key: {from: 1360, to: 1480},
-  logo: {from: 1480, to: 1552},
-  diffusion: {from: 1552, to: 1862},
-  calendar: {from: 1862, to: 2092},
-  simple: {from: 2092, to: 2252},
-  endcard: {from: 2252, to: 2498},
+  journey: {from: 684, to: 964},
+  reviews: {from: 964, to: 1204},
+  key: {from: 1204, to: 1324},
+  logo: {from: 1324, to: 1396},
+  diffusion: {from: 1396, to: 1706},
+  calendar: {from: 1706, to: 1936},
+  simple: {from: 1936, to: 2096},
+  endcard: {from: 2096, to: 2342},
 } as const;
 
-export const TOTAL_FRAMES = 2498; // 41,6 s
+export const TOTAL_FRAMES = 2342; // 39,0 s

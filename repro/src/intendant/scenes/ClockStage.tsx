@@ -1,5 +1,5 @@
 import React from 'react';
-import {C, SANS} from '../theme';
+import {C, SANS, SERIF, W_MED} from '../theme';
 import {useStage, clockGeom} from '../format';
 import {ramp, prog} from '../../ease';
 import {EASE} from '../../bezier';
@@ -159,7 +159,10 @@ export const ClockStage: React.FC<{frame: number}> = ({frame}) => {
         frame={frame}
         from={172}
         to={368}
-        fontSize={66}
+        fontSize={tall ? 70 : 72}
+        font={SERIF}
+        weight={400}
+        letterSpacing="-0.012em"
         maxWidth={tall ? 940 : undefined}
         segments={[
           {text: 'combien d’heures ', accent: true},
@@ -176,8 +179,8 @@ export const ClockStage: React.FC<{frame: number}> = ({frame}) => {
         width: W,
         textAlign: 'center',
         fontFamily: SANS,
-        fontWeight: 400,
-        fontSize: 34,
+        fontWeight: W_MED,
+        fontSize: 32,
         letterSpacing: '-0.01em',
         color: C.muted,
         opacity: EASE.entrance(prog(frame, 352, 404)),
