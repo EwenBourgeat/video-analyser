@@ -11,7 +11,11 @@ puis une nouvelle lecture image par image de la vidéo de référence.
 | **`repro/out/intendant_4x5.mp4`** | **1080 × 1350 @ 60 fps** | **fil Facebook / Instagram — le format de diffusion** |
 | `repro/out/intendant_16x9.mp4` | 1920 × 1080 @ 60 fps | in-stream, présentation, master |
 
-41,1 s. Plus de 9:16 : le fil est le seul placement visé.
+41,6 s. Plus de 9:16 : le fil est le seul placement visé.
+
+> **Le 4:5 est le format de travail.** Le 16:9 sur le disque date d'avant les
+> derniers réglages (carte verticale, navigateur reculé, pluie allongée) et
+> n'est plus à jour.
 
 ## Le 4:5 est une remise en page, pas un recadrage
 
@@ -32,10 +36,10 @@ Les scènes lisent la fenêtre réelle via `useStage()` (`src/intendant/format.t
 | Scène | Traitement en 4:5 |
 |---|---|
 | Horloge | cadran tenu à **r = 460** au lieu de suivre la largeur (il tomberait à 297) |
-| Navigateur | la page est une copie de la **scène**, donc fenêtre 4:5 |
+| Navigateur | la page est une copie de la **scène**, donc fenêtre 4:5, réduite à **63 % de la largeur**. Elle était à 87 %, alors que le 16:9 est à 63 % : le même recul donnait un plan bien plus serré |
 | « Un vrai métier » | **4 lignes courtes au lieu de 2 longues**, ce qui fait passer la typo à 80 px au lieu de 47 |
 | Parcours | colonne d'arrivée à 82 %, libellés **sous** la tuile, chiffre fantôme au-dessus |
-| Avis | **une carte de 900 px** à la fois — plus grande qu'en 16:9 |
+| Avis | **carte verticale 500 × 600**, deux de front. Un premier essai l'avait élargie à 900 × 340, soit un ratio de 2,65 : plus allongée que le 16:9 (560 × 302) à l'intérieur d'un cadre portrait. Le contenu est maintenant empilé sur un axe central |
 | Diffusion | lignes à 560 px pour dégager le losange |
 | Agenda | lignes re-proportionnées : 7 informations dans 940 px au lieu de 1780 |
 | « Nous gérons » | les deux membres **empilés**, typo conservée à 94 px |

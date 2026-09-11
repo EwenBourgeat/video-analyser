@@ -34,7 +34,13 @@ export const Browser: React.FC<{frame: number}> = ({frame}) => {
   */
   const {w: W, h: H, tall} = useStage();
   const FULL = tall ? W * 0.995 : 1900;
-  const SETTLED = tall ? W * 0.87 : 1216;
+  /*
+    0.63, not 0.87. In 16:9 the settled page is 1216 of 1920 — 63 % of the
+    width. The 4:5 version had it at 87 %, so the same pull-back read as barely
+    a pull-back at all: the picture ended up much closer than the wide cut ever
+    was. Matching the fraction restores the same sense of stepping back.
+  */
+  const SETTLED = tall ? W * 0.63 : 1216;
   const pageW = ramp(frame, [PULL_FROM, PULL_TO], [FULL, SETTLED], EASE.pullback);
   const pageH = pageW * (H / W);
   const pageTop = ramp(frame, [PULL_FROM, PULL_TO], [22, (H - pageW * (H / W)) / 2], EASE.pullback);

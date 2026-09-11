@@ -77,10 +77,10 @@ export const T = {
   reviews: {from: 1120, to: 1360},
   key: {from: 1360, to: 1480},
   logo: {from: 1480, to: 1552},
-  diffusion: {from: 1552, to: 1832},
-  calendar: {from: 1832, to: 2062},
-  simple: {from: 2062, to: 2222},
-  endcard: {from: 2222, to: 2468},
+  diffusion: {from: 1552, to: 1862},
+  calendar: {from: 1862, to: 2092},
+  simple: {from: 2092, to: 2252},
+  endcard: {from: 2252, to: 2498},
 } as const;
 
-export const TOTAL_FRAMES = 2468; // 41,1 s
+export const TOTAL_FRAMES = 2498; // 41,6 s
