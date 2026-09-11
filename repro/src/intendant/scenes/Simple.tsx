@@ -16,7 +16,7 @@ import {EASE} from '../../bezier';
  * it keeps its full 94 px.
  */
 
-const FROM = 2062;
+const FROM = 2092;
 
 /**
  * Where the transition disc lands, derived from the frame rather than fixed at
@@ -56,7 +56,7 @@ export const Simple: React.FC<{frame: number}> = ({frame}) => {
   const p1 = EASE.entrance(prog(frame, FROM + 46, FROM + 84));
   const p2 = EASE.entrance(prog(frame, FROM + 62, FROM + 104));
   // the transition disc contracts onto the badge and hands it over here
-  const badge = prog(frame, 2128, 2140);
+  const badge = prog(frame, 2158, 2170);
 
   const type: React.CSSProperties = {
     position: 'absolute',

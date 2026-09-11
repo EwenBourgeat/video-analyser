@@ -25,7 +25,7 @@ import {EASE} from '../../bezier';
  */
 
 const FROM = 1552;
-const TO = 1832;
+const TO = 1862;
 /**
  * The rain waits until the mark is well past the middle and heading left — much
  * later than it used to start. It cannot wait for the mark to stop, though: the
@@ -56,7 +56,7 @@ const HUB_TO = 1760;
  * made the two beats read as separate scenes rather than one continuous move.
  * The beat is 40 frames shorter as well, so the wait is now 72 frames.
  */
-const PUSH_FROM = 1788;
+const PUSH_FROM = 1818;
 /**
  * Which booking becomes the doorway — chosen by measurement, not by eye. At the
  * frame the push begins the six notes sit at y = -196, -59, 611, 543, 913 and
@@ -70,7 +70,7 @@ const HERO = 3;
 const HERO_SCALE = 14;
 
 const ROWS_X: [number, number][] = [
-  [1552, 96], [1644, 96], [1678, -220], [1710, -900], [1738, -1300], [1832, -1400],
+  [1552, 96], [1644, 96], [1678, -220], [1710, -900], [1738, -1300], [1862, -1400],
 ];
 
 const Spinner: React.FC<{size: number; frame: number}> = ({size, frame}) => (

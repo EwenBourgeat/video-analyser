@@ -128,6 +128,16 @@ export const Metier: React.FC<{frame: number}> = ({frame}) => {
                 const done = p > 0.999;
                 // opacity leads the resolve so a letter is never a grey smudge
                 const o = Math.min(1, p * 1.5);
+                /*
+                  A letter that is still invisible carries no filter and no
+                  bloom. It used to: every not-yet-revealed character was given a
+                  blur and two text-shadows of 46 and 101 px for no visible
+                  result, and on the beat's first frames that is sixty-odd of
+                  them at once. It made the frame so expensive that a render
+                  timed out on it after seven minutes. Skipping work that draws
+                  nothing is free.
+                */
+                const lit = o > 0.004;
                 const glow = accent ? '146,196,255' : '255,255,255';
                 return (
                   <span
@@ -137,11 +147,12 @@ export const Metier: React.FC<{frame: number}> = ({frame}) => {
                       opacity: o,
                       color: accent ? C.blue350 : C.inkDark,
                       // the whole reveal: out of focus and over-exposed, into place
-                      filter: done ? undefined : `blur(${(1 - p) * BLUR}px)`,
-                      textShadow: done
-                        ? undefined
-                        : `0 0 ${(1 - p) * BLOOM}px rgba(${glow},${(1 - p) * 0.95}),` +
-                          ` 0 0 ${(1 - p) * BLOOM * 2.2}px rgba(${glow},${(1 - p) * 0.5})`,
+                      filter: done || !lit ? undefined : `blur(${(1 - p) * BLUR}px)`,
+                      textShadow:
+                        done || !lit
+                          ? undefined
+                          : `0 0 ${(1 - p) * BLOOM}px rgba(${glow},${(1 - p) * 0.95}),` +
+                            ` 0 0 ${(1 - p) * BLOOM * 2.2}px rgba(${glow},${(1 - p) * 0.5})`,
                     }}
                   >
                     {ch}

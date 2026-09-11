@@ -39,15 +39,25 @@ const TO = T.reviews.to;
 /**
  * Row geometry per frame.
  *
- * 16:9 shows three cards of 560 side by side. 1 080 px only holds one and a
- * half of those, so 4:5 shows ONE card at a time at 900 — bigger than in the
- * wide cut, not smaller. The drift is unchanged in character: a supply of
- * reviews passing right to left, just one at a time instead of three.
+ * 16:9 lays a card out landscape — 560 × 302 — and shows three side by side.
+ *
+ * A first pass at 4:5 simply widened that to 900 × 340, which made it MORE
+ * landscape than the wide cut (a ratio of 2.65) inside a portrait frame. The
+ * card is now portrait too: 500 × 600, stacked and centred rather than laid out
+ * in a row. Two fit across the frame with 30 px to spare, so the drift still
+ * reads as a supply of reviews passing by rather than a single object.
  */
 const geom = (tall: boolean) => {
-  const cardW = tall ? 900 : 560;
-  const gap = tall ? 60 : 64;
-  return {cardW, cardH: tall ? 340 : 302, gap, pitch: cardW + gap, rowY: tall ? 640 : 536};
+  const cardW = tall ? 500 : 560;
+  const gap = tall ? 50 : 64;
+  return {
+    cardW,
+    cardH: tall ? 600 : 302,
+    gap,
+    pitch: cardW + gap,
+    rowY: tall ? 540 : 536,
+    vertical: tall,
+  };
 };
 
 /**
@@ -122,13 +132,14 @@ const Stars: React.FC = () => (
 );
 
 /** One card. Nothing animates inside it — only its x, and that comes from the camera. */
-const Card: React.FC<{r: Review; x: number; cardW: number; cardH: number; rowY: number}> = ({
-  r,
-  x,
-  cardW,
-  cardH,
-  rowY,
-}) => (
+const Card: React.FC<{
+  r: Review;
+  x: number;
+  cardW: number;
+  cardH: number;
+  rowY: number;
+  vertical: boolean;
+}> = ({r, x, cardW, cardH, rowY, vertical}) => (
   <div
     style={{
       position: 'absolute',
@@ -139,41 +150,78 @@ const Card: React.FC<{r: Review; x: number; cardW: number; cardH: number; rowY: 
       borderRadius: 30,
       background: C.paper,
       boxShadow: '0 18px 44px rgba(0,0,0,0.34)',
-      padding: '30px 36px',
+      padding: vertical ? '40px 34px' : '30px 36px',
       display: 'flex',
       flexDirection: 'column',
-      gap: 18,
+      alignItems: vertical ? 'center' : undefined,
+      justifyContent: vertical ? 'center' : undefined,
+      gap: vertical ? 22 : 18,
+      textAlign: vertical ? 'center' : undefined,
       fontFamily: SANS,
       boxSizing: 'border-box',
     }}
   >
-    <div style={{display: 'flex', alignItems: 'center', gap: 18}}>
-      <Img
-        src={staticFile(`people/${r.photo}.jpg`)}
-        style={{width: 66, height: 66, borderRadius: '50%', objectFit: 'cover', flexShrink: 0}}
-      />
-      <div style={{flex: 1, minWidth: 0}}>
-        <div style={{fontWeight: 600, fontSize: 31, color: C.ink, letterSpacing: '-0.014em'}}>
-          {r.who}
+    {vertical ? (
+      /* Portrait: everything stacked on one centre line — photo, name, date,
+         stars, quote, then the Google mark as a footer. */
+      <>
+        <Img
+          src={staticFile(`people/${r.photo}.jpg`)}
+          style={{width: 104, height: 104, borderRadius: '50%', objectFit: 'cover'}}
+        />
+        <div>
+          <div style={{fontWeight: 600, fontSize: 34, color: C.ink, letterSpacing: '-0.014em'}}>
+            {r.who}
+          </div>
+          <div style={{fontWeight: 400, fontSize: 23, color: '#70757A', marginTop: 4}}>
+            {r.when}
+          </div>
         </div>
-        <div style={{fontWeight: 400, fontSize: 22, color: '#70757A', marginTop: 3}}>{r.when}</div>
-      </div>
-      <GoogleG size={32} />
-    </div>
-
-    <Stars />
-
-    <div
-      style={{
-        fontWeight: 400,
-        fontSize: 30,
-        lineHeight: 1.42,
-        letterSpacing: '-0.008em',
-        color: C.inkSoft,
-      }}
-    >
-      {`« ${r.q} »`}
-    </div>
+        <Stars />
+        <div
+          style={{
+            fontWeight: 400,
+            fontSize: 34,
+            lineHeight: 1.44,
+            letterSpacing: '-0.008em',
+            color: C.inkSoft,
+          }}
+        >
+          {`« ${r.q} »`}
+        </div>
+        <GoogleG size={30} />
+      </>
+    ) : (
+      <>
+        <div style={{display: 'flex', alignItems: 'center', gap: 18}}>
+          <Img
+            src={staticFile(`people/${r.photo}.jpg`)}
+            style={{width: 66, height: 66, borderRadius: '50%', objectFit: 'cover', flexShrink: 0}}
+          />
+          <div style={{flex: 1, minWidth: 0}}>
+            <div style={{fontWeight: 600, fontSize: 31, color: C.ink, letterSpacing: '-0.014em'}}>
+              {r.who}
+            </div>
+            <div style={{fontWeight: 400, fontSize: 22, color: '#70757A', marginTop: 3}}>
+              {r.when}
+            </div>
+          </div>
+          <GoogleG size={32} />
+        </div>
+        <Stars />
+        <div
+          style={{
+            fontWeight: 400,
+            fontSize: 30,
+            lineHeight: 1.42,
+            letterSpacing: '-0.008em',
+            color: C.inkSoft,
+          }}
+        >
+          {`« ${r.q} »`}
+        </div>
+      </>
+    )}
   </div>
 );
 
@@ -241,7 +289,15 @@ export const Reviews: React.FC<{frame: number}> = ({frame}) => {
           while (x < -g.cardW - g.gap) x += LOOP;
           if (x > W + g.gap) return null;
           return (
-            <Card key={i} r={r} x={x} cardW={g.cardW} cardH={g.cardH} rowY={g.rowY} />
+            <Card
+              key={i}
+              r={r}
+              x={x}
+              cardW={g.cardW}
+              cardH={g.cardH}
+              rowY={g.rowY}
+              vertical={g.vertical}
+            />
           );
         })}
       </div>
