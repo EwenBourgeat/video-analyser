@@ -22,7 +22,7 @@ import {ramp, softOut, softOutQuint, prog} from '../../ease';
  * everywhere else.
  */
 
-const FROM = 1480;
+const FROM = 1324;
 const MARK = 300;
 
 /**

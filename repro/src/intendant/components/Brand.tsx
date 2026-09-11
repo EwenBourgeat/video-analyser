@@ -1,5 +1,5 @@
 import React from 'react';
-import {C, SANS} from '../theme';
+import {C, SANS, SERIF} from '../theme';
 
 /**
  * The real L'Intendant mark, supplied by the client: a diamond carrying a serif
@@ -52,10 +52,16 @@ export const Wordmark: React.FC<{
   return (
     <span
       style={{
-        fontFamily: SANS,
-        fontWeight: 500,
-        fontSize: size,
-        letterSpacing: '-0.022em',
+        /*
+          Didot, not Futura. The diamond beside this word contains a SERIF "I",
+          drawn as paths; setting the name in a geometric sans put two different
+          alphabets in the same lockup. The didone matches the letter the mark is
+          built from.
+        */
+        fontFamily: SERIF,
+        fontWeight: 400,
+        fontSize: size * 1.04,
+        letterSpacing: '-0.012em',
         color: ink,
         whiteSpace: 'pre',
       }}

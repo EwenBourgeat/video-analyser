@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SANS, MONO} from '../theme';
+import {C, SANS, MONO, W_MED, W_BOLD} from '../theme';
 import {useStage} from '../format';
 import {Paper} from '../components/Grounds';
 import {Mark} from '../components/Brand';
@@ -24,14 +24,14 @@ import {EASE} from '../../bezier';
  * here, which is exactly what the beat says.
  */
 
-const FROM = 1552;
-const TO = 1862;
+const FROM = 1396;
+const TO = 1706;
 /**
  * The rain waits until the mark is well past the middle and heading left — much
  * later than it used to start. It cannot wait for the mark to stop, though: the
  * rows are gone by then, and holding both back left twenty frames of empty page.
  */
-const HANDOVER = 1732;
+const HANDOVER = 1576;
 
 const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
 
@@ -42,8 +42,8 @@ const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
  * character — "pas assez fluide". It is now a single Bezier move: it leaves
  * slowly, crosses with real speed, and settles long on the left.
  */
-const HUB_FROM = 1648;
-const HUB_TO = 1760;
+const HUB_FROM = 1492;
+const HUB_TO = 1604;
 
 /**
  * The push-through. On the last 44 frames one booking card stops rising, centres
@@ -56,7 +56,7 @@ const HUB_TO = 1760;
  * made the two beats read as separate scenes rather than one continuous move.
  * The beat is 40 frames shorter as well, so the wait is now 72 frames.
  */
-const PUSH_FROM = 1818;
+const PUSH_FROM = 1662;
 /**
  * Which booking becomes the doorway — chosen by measurement, not by eye. At the
  * frame the push begins the six notes sit at y = -196, -59, 611, 543, 913 and
@@ -70,7 +70,7 @@ const HERO = 3;
 const HERO_SCALE = 14;
 
 const ROWS_X: [number, number][] = [
-  [1552, 96], [1644, 96], [1678, -220], [1710, -900], [1738, -1300], [1862, -1400],
+  [1396, 96], [1488, 96], [1522, -220], [1554, -900], [1582, -1300], [1706, -1400],
 ];
 
 const Spinner: React.FC<{size: number; frame: number}> = ({size, frame}) => (
@@ -152,8 +152,8 @@ const Note: React.FC<{
         <Tick size={40} p={1} />
       </span>
       <div>
-        <div style={{fontWeight: 600, fontSize: 29, color: C.ink}}>Nouvelle réservation</div>
-        <div style={{fontWeight: 400, fontSize: 23, color: C.muted, marginTop: 3}}>
+        <div style={{fontWeight: W_BOLD, fontSize: 29, color: C.ink}}>Nouvelle réservation</div>
+        <div style={{fontWeight: W_MED, fontSize: 23, color: C.muted, marginTop: 3}}>
           {p} · 3 nuits
         </div>
       </div>
@@ -200,7 +200,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
   // so the two scenes share one position at the cut
   const markY = H / 2 - 44 * (1 - hub);
   const rowsX = keyframes(frame, ROWS_X);
-  const rowsOut = 1 - prog(frame, 1714, 1740);
+  const rowsOut = 1 - prog(frame, 1558, 1584);
   const rain = prog(frame, HANDOVER, TO);
   const rainIn = EASE.entrance(prog(frame, HANDOVER, HANDOVER + 34));
   /**
@@ -292,7 +292,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
               left: rowsX + ROW_X,
               top: H / 2 + (tall ? 258 : 330),
               fontFamily: SANS,
-              fontWeight: 400,
+              fontWeight: W_MED,
               fontSize: tall ? 24 : 32,
               width: tall ? ROW_W : undefined,
               color: C.muted,

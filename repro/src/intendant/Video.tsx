@@ -1,7 +1,5 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
-import {loadFont as loadInstrument} from '@remotion/google-fonts/InstrumentSans';
-import {loadFont as loadJetBrains} from '@remotion/google-fonts/JetBrainsMono';
 import {C, T} from './theme';
 import {useStage} from './format';
 import {prog, softOut, inCubic} from '../ease';
@@ -19,14 +17,16 @@ import {Simple, badgeAt} from './scenes/Simple';
 import {EndCard} from './scenes/EndCard';
 import {Ink} from './components/Grounds';
 
-// the brand's own typefaces, taken from the site's CSS
-loadInstrument('normal', {weights: ['400', '500', '600', '700']});
-loadJetBrains('normal', {weights: ['400', '500', '600']});
+/*
+  No web fonts to load: the charter's Didot and Futura are installed system
+  faces, which Chrome resolves by family name. See theme.ts for the fallbacks
+  and for why only two Futura weights are usable.
+*/
 
 /** Radius of the disc that carries the calendar -> payoff transition. */
 const MORPH_R = (f: number) => {
-  if (f <= 2104) return 1400 * inCubic(prog(f, 2072, 2104));   // the pill floods out
-  return 1400 + (32 - 1400) * softOut(prog(f, 2108, 2166));    // and contracts to the badge
+  if (f <= 1948) return 1400 * inCubic(prog(f, 1916, 1948));   // the pill floods out
+  return 1400 + (32 - 1400) * softOut(prog(f, 1952, 2010));    // and contracts to the badge
 };
 
 const In: React.FC<{from: number; to: number; frame: number; children: React.ReactNode}> = ({
@@ -98,7 +98,7 @@ export const Intendant: React.FC = () => {
         contracts onto the check badge of the next line. The button becomes the
         badge — the transition is one object changing size, not a cut.
       */}
-      {frame >= 2072 && frame <= 2166 ? (
+      {frame >= 1916 && frame <= 2010 ? (
         <AbsoluteFill style={{pointerEvents: 'none'}}>
           <div
             style={{
@@ -120,7 +120,7 @@ export const Intendant: React.FC = () => {
                 left: badge.x,
                 top: badge.y,
                 transform: 'translate(-50%,-50%)',
-                opacity: prog(frame, 2148, 2160),
+                opacity: prog(frame, 1992, 2004),
               }}
             >
               <svg width={64} height={64} viewBox="0 0 40 40">

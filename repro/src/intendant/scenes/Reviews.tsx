@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
-import {C, SANS, MONO, T} from '../theme';
+import {C, SANS, SERIF, W_MED, W_BOLD, T} from '../theme';
 import {useStage} from '../format';
 import {camXAt} from './Journey';
 import {Ink} from '../components/Grounds';
@@ -170,17 +170,17 @@ const Card: React.FC<{
           style={{width: 104, height: 104, borderRadius: '50%', objectFit: 'cover'}}
         />
         <div>
-          <div style={{fontWeight: 600, fontSize: 34, color: C.ink, letterSpacing: '-0.014em'}}>
+          <div style={{fontWeight: W_BOLD, fontSize: 32, color: C.ink, letterSpacing: '-0.01em'}}>
             {r.who}
           </div>
-          <div style={{fontWeight: 400, fontSize: 23, color: '#70757A', marginTop: 4}}>
+          <div style={{fontWeight: W_MED, fontSize: 23, color: '#70757A', marginTop: 4}}>
             {r.when}
           </div>
         </div>
         <Stars />
         <div
           style={{
-            fontWeight: 400,
+            fontWeight: W_MED,
             fontSize: 34,
             lineHeight: 1.44,
             letterSpacing: '-0.008em',
@@ -199,10 +199,10 @@ const Card: React.FC<{
             style={{width: 66, height: 66, borderRadius: '50%', objectFit: 'cover', flexShrink: 0}}
           />
           <div style={{flex: 1, minWidth: 0}}>
-            <div style={{fontWeight: 600, fontSize: 31, color: C.ink, letterSpacing: '-0.014em'}}>
+            <div style={{fontWeight: W_BOLD, fontSize: 30, color: C.ink, letterSpacing: '-0.01em'}}>
               {r.who}
             </div>
-            <div style={{fontWeight: 400, fontSize: 22, color: '#70757A', marginTop: 3}}>
+            <div style={{fontWeight: W_MED, fontSize: 22, color: '#70757A', marginTop: 3}}>
               {r.when}
             </div>
           </div>
@@ -211,7 +211,7 @@ const Card: React.FC<{
         <Stars />
         <div
           style={{
-            fontWeight: 400,
+            fontWeight: W_MED,
             fontSize: 30,
             lineHeight: 1.42,
             letterSpacing: '-0.008em',
@@ -252,9 +252,9 @@ export const Reviews: React.FC<{frame: number}> = ({frame}) => {
           top: tall ? 268 : 232,
           width: W,
           textAlign: 'center',
-          fontFamily: MONO,
-          fontWeight: 500,
-          fontSize: 26,
+          fontFamily: SANS,
+          fontWeight: W_MED,
+          fontSize: 25,
           letterSpacing: '0.22em',
           color: C.blue350,
           opacity: kicker * out,
@@ -270,9 +270,9 @@ export const Reviews: React.FC<{frame: number}> = ({frame}) => {
           top: tall ? 328 : 292,
           width: W,
           textAlign: 'center',
-          fontFamily: SANS,
-          fontWeight: 600,
-          fontSize: tall ? 62 : 76,
+          fontFamily: SERIF,
+          fontWeight: 400,
+          fontSize: tall ? 66 : 80,
           letterSpacing: '-0.03em',
           color: C.inkDark,
           opacity: title * out,

@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C} from '../theme';
+import {C, SERIF} from '../theme';
 import {useStage} from '../format';
 import {Ink} from '../components/Grounds';
 import {Kinetic} from '../components/Type';
@@ -19,14 +19,14 @@ import {keyframes} from '../../ease';
  * not effects.
  */
 
-const FROM = 1360;
+const FROM = 1204;
 
 const SCALE: [number, number][] = [
-  [FROM, 0.94], [1395, 0.96], [1408, 1.02], [1424, 1.10], [1443, 1.15], [1469, 1.17],
+  [FROM, 0.94], [1239, 0.96], [1252, 1.02], [1268, 1.10], [1287, 1.15], [1313, 1.17],
 ];
 const TOP: [number, number][] = [
-  [FROM, 1250], [1371, 910], [1382, 706], [1394, 600], [1403, 570],
-  [1416, 580], [1430, 604], [1446, 622], [1469, 632],
+  [FROM, 1250], [1215, 910], [1226, 706], [1238, 600], [1247, 570],
+  [1260, 580], [1274, 604], [1290, 622], [1313, 632],
 ];
 
 export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
@@ -78,7 +78,10 @@ export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
           frame={frame}
           from={FROM + 13}
           to={FROM + 77}
-          fontSize={tall ? 88 : 96}
+          fontSize={tall ? 92 : 100}
+          font={SERIF}
+          weight={400}
+          letterSpacing="-0.012em"
           maxWidth={tall ? 900 : undefined}
           tone="dark"
           segments={[{text: 'vous ne gérez '}, {text: 'plus rien', accent: true}]}

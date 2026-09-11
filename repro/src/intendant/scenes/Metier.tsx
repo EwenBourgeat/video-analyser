@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SANS} from '../theme';
+import {C, SERIF} from '../theme';
 import {useStage} from '../format';
 import {Ink} from '../components/Grounds';
 import {prog} from '../../ease';
@@ -109,8 +109,8 @@ export const Metier: React.FC<{frame: number}> = ({frame}) => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: SANS,
-          fontWeight: 600,
+          fontFamily: SERIF,
+          fontWeight: 400,
           fontSize: FONT,
           lineHeight: 1.2,
           letterSpacing: '-0.028em',

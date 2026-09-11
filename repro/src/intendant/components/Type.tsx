@@ -1,5 +1,5 @@
 import React from 'react';
-import {C, SANS} from '../theme';
+import {C, SANS, W_MED, W_BOLD} from '../theme';
 import {softOut, outCubic, prog} from '../../ease';
 
 export type Seg = {text: string; accent?: boolean};
@@ -27,6 +27,8 @@ export const Kinetic: React.FC<{
   letterSpacing?: string;
   /** Set to let the line wrap inside this width — needed in the 4:5 frame. */
   maxWidth?: number;
+  /** Defaults to Futura; the film's statement lines pass Didot. */
+  font?: string;
   style?: React.CSSProperties;
 }> = ({
   segments,
@@ -35,10 +37,11 @@ export const Kinetic: React.FC<{
   to,
   fontSize,
   tone = 'light',
-  weight = 600,
+  weight = W_BOLD,
   unit = 'char',
   letterSpacing = '-0.028em',
   maxWidth,
+  font = SANS,
   style,
 }) => {
   const ink = tone === 'dark' ? C.inkDark : C.ink;
@@ -61,7 +64,7 @@ export const Kinetic: React.FC<{
   return (
     <div
       style={{
-        fontFamily: SANS,
+        fontFamily: font,
         fontWeight: weight,
         fontSize,
         letterSpacing,
@@ -183,7 +186,7 @@ export const KineticScroll: React.FC<{
         transform: 'translateY(-50%)',
         whiteSpace: 'nowrap',
         fontFamily: SANS,
-        fontWeight: 600,
+        fontWeight: W_BOLD,
         fontSize,
         letterSpacing: '-0.028em',
       }}

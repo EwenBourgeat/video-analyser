@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, W, H, SANS, MONO} from '../theme';
+import {C, W, H, SANS, MONO, W_MED, W_BOLD} from '../theme';
 import {Paper} from '../components/Grounds';
 import {Mark, Wordmark} from '../components/Brand';
 import {prog} from '../../ease';
@@ -18,7 +18,7 @@ import {EASE} from '../../bezier';
  * The offer still reads: the contact line carries it, without a button to click.
  */
 
-const FROM = 2252;
+const FROM = 2096;
 
 export const EndCard: React.FC<{frame: number}> = ({frame}) => {
   // longer, more overlapped ramps — nothing lands on the same frame as anything else
@@ -71,7 +71,7 @@ export const EndCard: React.FC<{frame: number}> = ({frame}) => {
         <div
           style={{
             fontFamily: SANS,
-            fontWeight: 400,
+            fontWeight: W_MED,
             fontSize: 33,
             letterSpacing: '0.14em',
             textTransform: 'uppercase',
@@ -88,7 +88,7 @@ export const EndCard: React.FC<{frame: number}> = ({frame}) => {
             marginTop: 26,
             textAlign: 'center',
             fontFamily: SANS,
-            fontWeight: 400,
+            fontWeight: W_MED,
             fontSize: 34,
             lineHeight: 1.6,
             color: C.inkSoft,
