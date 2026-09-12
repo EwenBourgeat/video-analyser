@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SANS, W_MED} from '../../intendant/theme';
+import {C} from '../../intendant/theme';
 import {useStage, clockGeom} from '../format';
 import {Paper} from '../components/Grounds';
 import {keyframes, prog, softOut} from '../../ease';
@@ -76,20 +76,20 @@ const SNUFF = 7;
  * reads as a steady progression rather than as three clumps going out at once.
  */
 /**
- * Twenty-four properties, six of them named.
+ * Twenty-four properties, unnamed.
  *
- * Naming all twenty-four would fill the disc with type and none of it would be
- * readable at feed size; six is enough to say "these are real Toulouse
- * neighbourhoods" without turning the radar into a list. They sit at spread
- * bearings so no two labels can collide, and each name lives and dies with its
- * own pin — lit on the stagger, put out when the sweep head crosses it.
+ * District names were tried here and taken back out. The beat lasts 3.2 s and
+ * its subject is the SCAN — dots going out in sequence as the sweep crosses
+ * them. Type on the disc competes with that: the eye stops to read instead of
+ * following the sweep, and six labels appearing and vanishing on their own
+ * timers is a second animation running against the first.
  */
-const PINS: [number, number, string?][] = [
-  [0.30, -102, 'Capitole'], [0.27, 26], [0.52, -138], [0.57, -46], [0.60, 70],
-  [0.83, -156], [0.86, -22, 'Saint-Cyprien'], [0.88, 128], [0.93, 14], [0.70, 168],
-  [0.44, 96, 'Les Carmes'], [0.75, -78], [0.36, -12], [0.64, 44, 'Jean Jaurès'], [0.22, 152],
-  [0.91, 88], [0.48, -172], [0.79, 108, 'Minimes'], [0.33, 62], [0.68, -118],
-  [0.55, 8], [0.86, -58, 'Blagnac'], [0.41, 132], [0.73, -6],
+const PINS: [number, number][] = [
+  [0.30, -102], [0.27, 26], [0.52, -138], [0.57, -46], [0.60, 70],
+  [0.83, -156], [0.86, -22], [0.88, 128], [0.93, 14], [0.70, 168],
+  [0.44, 96], [0.75, -78], [0.36, -12], [0.64, 44], [0.22, 152],
+  [0.91, 88], [0.48, -172], [0.79, 108], [0.33, 62], [0.68, -118],
+  [0.55, 8], [0.86, -58], [0.41, 132], [0.73, -6],
 ];
 
 /** Frame at which the sweep head first reaches this bearing after SCAN_FROM. */
@@ -220,7 +220,7 @@ export const MapPins: React.FC<{frame: number}> = ({frame}) => {
           {Array.from({length: SLICES}, (_, i) => slice(i))}
         </g>
 
-        {PINS.map(([rf, ang, name], i) => {
+        {PINS.map(([rf, ang], i) => {
           // it lights up on the stagger, and the sweep head is what puts it out
           const lit = prog(frame, litOf(i, PINS.length), litOf(i, PINS.length) + 12);
           const o = lit * (1 - prog(frame, deathOf(ang), deathOf(ang) + SNUFF));
@@ -229,27 +229,7 @@ export const MapPins: React.FC<{frame: number}> = ({frame}) => {
           const s = (0.8 + 0.2 * o) * Math.pow(r / 470, 0.35) * 1.35;
           const px = CX + Math.cos(rad) * r * rf;
           const py = CY + Math.sin(rad) * r * rf;
-          // the name sits on whichever side keeps it inside the disc
-          const toRight = Math.cos(rad) < 0.25;
-          return (
-            <React.Fragment key={i}>
-              <Pin x={px} y={py} s={s} o={o} />
-              {name ? (
-                <text
-                  x={px + (toRight ? 30 : -30)}
-                  y={py + 9}
-                  textAnchor={toRight ? 'start' : 'end'}
-                  fontFamily={SANS}
-                  fontWeight={W_MED}
-                  fontSize={27}
-                  fill={C.inkSoft}
-                  fillOpacity={o * 0.92}
-                >
-                  {name}
-                </text>
-              ) : null}
-            </React.Fragment>
-          );
+          return <Pin key={i} x={px} y={py} s={s} o={o} />;
         })}
       </svg>
     </AbsoluteFill>

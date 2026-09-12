@@ -1,90 +1,95 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SERIF} from '../theme';
-import {useStage} from '../format';
-import {Ink} from '../components/Grounds';
-import {Kinetic} from '../components/Type';
-import {keyframes} from '../../ease';
+import {SERIF} from '../theme';
+import {Ink, Paper} from '../components/Grounds';
+import {Exposure} from '../components/Exposure';
+import {prog} from '../../ease';
+import {EASE} from '../../bezier';
 
 /**
- * Beat 7 — you hand over the keys, 18.3 -> 20.5 s.
+ * Beat 7 — the payoff of the travelling, 20.1 -> 22.1 s.
  *
- * Redrawn after the client called the previous version "slop IA". The tell was
- * the glow: a fat coloured bloom around a chunky silhouette. It is gone, and so
- * are the paper-plane sparks that cluttered the frame.
+ * The key is gone. It had been redrawn twice — first stripped of its glow and
+ * sparks, then flattened to a single silhouette — and the honest reading of
+ * that sequence is that the object was never carrying the beat. The line is:
+ * "vous ne gérez plus rien". A key drawn beside it illustrates the noun and says
+ * nothing about the sentence, and it took two thirds of the frame to do it.
  *
- * What is left is a single well-proportioned key — slim shaft, true circular
- * bow, two clean wards — in flat brand blue with one soft shadow for depth, and
- * a thin ring drawn around the bow that echoes the mark's geometry. Restraint,
- * not effects.
+ * So the beat is now the line alone, centred on white, revealed with the same
+ * `Exposure` gesture as "Parce que gérer une location courte durée" — the
+ * film's two statement lines, told the same way.
+ *
+ * The white is raised and lowered INSIDE the scene, exactly as the stations beat
+ * does it. Both of this beat's cuts land on dark ground, and painting the scene
+ * white outright would put a sixty-point luminance step at each one.
  */
 
 const FROM = 1204;
+const TO = 1324;
 
-const SCALE: [number, number][] = [
-  [FROM, 0.94], [1239, 0.96], [1252, 1.02], [1268, 1.10], [1287, 1.15], [1313, 1.17],
-];
-const TOP: [number, number][] = [
-  [FROM, 1250], [1215, 910], [1226, 706], [1238, 600], [1247, 570],
-  [1260, 580], [1274, 604], [1290, 622], [1313, 632],
-];
+/** The wave crosses the line in this many frames. */
+const REVEAL = 52;
+const REVEAL_FROM = FROM + 10;
+
+/** The line goes back out of focus before the ground starts to darken. */
+const EXIT_FROM = 1288;
+const EXIT_TO = 1306;
+
+/**
+ * Ground: up to white once the cut has landed — and it STAYS there.
+ *
+ * The stations beat has to come back down because the reviews that follow it are
+ * on dark ground. This one does not: the logo beat that follows opens on
+ * `Paper`, so holding the white all the way to the cut is what MATCHES it.
+ *
+ * It also fixes a step that predates this rebuild. The old key-on-dark version
+ * ended at luminance 36 and the logo beat opens at 253, so the boundary carried
+ * a 217-point jump — a white flash that every other cut in the film had been
+ * measured and tuned to avoid. Ending on the same ground the next beat begins on
+ * takes it to zero.
+ */
+const WHITE_IN: [number, number] = [FROM + 2, FROM + 36];
+
+/**
+ * Two rows rather than one, in both frames.
+ *
+ * The accent falls on "plus rien", which is half the sentence — so the break is
+ * where the colour changes and the line reads as a statement and its turn,
+ * rather than as one line that happens to wrap.
+ */
+const ROWS = ['vous ne gérez', 'plus rien'];
+
+/**
+ * Nine, not the twenty `Exposure` defaults to.
+ *
+ * `soft` is how many letters are resolving at once, and the default is set for a
+ * sixty-character sentence. On a twenty-two character line it would have the
+ * whole thing blooming simultaneously — a fade, not a sweep.
+ */
+const SOFT = 9;
 
 export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
-  const s = keyframes(frame, SCALE);
-  const top = keyframes(frame, TOP);
-  const {w: W, h: H, tall} = useStage();
-  const cx = W / 2;
+  const whiteness = EASE.entrance(prog(frame, WHITE_IN[0], WHITE_IN[1]));
 
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
       <Ink glow={0.5} />
-      {/*
-        One flat silhouette and nothing else.
-        The key used to carry a gradient, a 26 px drop shadow and a thin ring
-        around the bow. Three effects doing the work a single shape should do —
-        and the charter is built from flat fields, so none of them belonged.
-      */}
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute'}}>
-        <g transform={`translate(${cx} ${top}) scale(${s})`} fill={C.blue600}>
-          {/* bow, with the hole cut out rather than painted over */}
-          <path
-            d="M0 -116 A116 116 0 1 1 0 116 A116 116 0 1 1 0 -116 Z
-               M0 -44 A44 44 0 1 0 0 44 A44 44 0 1 0 0 -44 Z"
-            fillRule="evenodd"
-          />
-          {/* shaft */}
-          <rect x={-20} y={104} width={40} height={430} rx={12} />
-          {/* wards */}
-          <rect x={14} y={330} width={92} height={38} rx={11} />
-          <rect x={14} y={412} width={64} height={38} rx={11} />
-        </g>
-      </svg>
-
-      <div
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: top - 268 * s,
-          width: W,
-          display: 'flex',
-          justifyContent: 'center',
-          transform: 'translateY(-50%)',
-        }}
-      >
-        <Kinetic
-          frame={frame}
-          from={FROM + 13}
-          to={FROM + 77}
-          fontSize={tall ? 92 : 100}
-          font={SERIF}
-          weight={400}
-          letterSpacing="-0.012em"
-          maxWidth={tall ? 900 : undefined}
-          tone="dark"
-          segments={[{text: 'vous ne gérez '}, {text: 'plus rien', accent: true}]}
-        />
-      </div>
-      {void H}
+      {/* the NEXT beat's ground, faded up over this one's — so the cut is a no-op */}
+      <AbsoluteFill style={{opacity: whiteness, pointerEvents: 'none'}}>
+        <Paper wash={0.55} />
+      </AbsoluteFill>
+      <Exposure
+        frame={frame}
+        rows={ROWS}
+        from={REVEAL_FROM}
+        reveal={REVEAL}
+        exitFrom={EXIT_FROM}
+        exitTo={EXIT_TO}
+        fontSize={92}
+        font={SERIF}
+        ground="light"
+        soft={SOFT}
+      />
     </AbsoluteFill>
   );
 };

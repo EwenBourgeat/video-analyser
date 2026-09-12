@@ -23,6 +23,11 @@ const RISE = 0.055;
 // the second hand runs at its true ratio now, so it needs a real smear
 const SLICES = 13;
 
+/** Beat time, in seconds, at which the browser takes the dial over (frame 300). */
+const SPIN_FREEZE = (300 - 150) / 60;
+/** The rate reached there — d/dt (60t + 23t^2) — and held from then on. */
+const SPIN_RATE = 60 + 46 * SPIN_FREEZE;
+
 const Clock: React.FC<{frame: number}> = ({frame}) => {
   const {w, h, tall} = useStage();
   const dial = clockGeom(w, h, tall);
@@ -56,7 +61,19 @@ const Clock: React.FC<{frame: number}> = ({frame}) => {
      *
      * The gear ratios below are untouched: one quantity drives all three hands.
      */
-    const clockSeconds = 60 * t + 23 * t * t;
+    /*
+     * The acceleration STOPS when the dial becomes the browser's content.
+     *
+     * The law ran 60t + 23t^2 for the whole beat, so the hand was still
+     * gaining speed while the page zoomed out — and the zoom-out makes that
+     * worse rather than hiding it: the same angular rate on a dial half the
+     * size reads as faster, so the acceleration and the shrink compounded at
+     * exactly the moment they met. The quadratic now ends at the handover and
+     * the hand carries on at the speed it had reached, which keeps the ramp
+     * where the clock is full-bleed and there is room to read it.
+     */
+    const u = Math.min(t, SPIN_FREEZE);
+    const clockSeconds = 60 * u + 23 * u * u + Math.max(0, t - SPIN_FREEZE) * SPIN_RATE;
     const sec = clockSeconds * 6;
     return {sec: sec + 40, min: sec / 60, hour: sec / 720 + 108};
   };
