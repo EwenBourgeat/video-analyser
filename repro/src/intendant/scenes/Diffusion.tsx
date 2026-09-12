@@ -43,7 +43,13 @@ const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
  * slowly, crosses with real speed, and settles long on the left.
  */
 const HUB_FROM = 1492;
-const HUB_TO = 1604;
+/**
+ * The mark finishes travelling exactly as the rain begins (HANDOVER), not 28
+ * frames after it. The rain's column is derived from where the mark comes to
+ * rest, so the mark has to BE there before the first card is drawn — otherwise
+ * the bound is computed against a position the mark has not reached yet.
+ */
+const HUB_TO = 1576;
 
 /**
  * The push-through. On the last 44 frames one booking card stops rising, centres
@@ -106,14 +112,43 @@ const Tick: React.FC<{size: number; p: number}> = ({size, p}) => (
   </svg>
 );
 
+/** The card's unscaled width — the layout has to know it to place by edges. */
+const NOTE_W = 600;
+
+/**
+ * Where the mark comes to rest, as a fraction of the frame.
+ *
+ * Further left in 4:5 than in 16:9: the narrow frame has to fit the mark AND the
+ * booking rain side by side, and 0.27 left only 673 px for cards 600 wide.
+ */
+const HUB_END = (tall: boolean) => (tall ? 0.20 : 0.27);
+
+/** The size the mark settles at, mirrored from `markSize` below. */
+const MARK_SETTLED = 222;
+
+/**
+ * Speeds DECREASE down the column, and that is a constraint rather than a taste.
+ *
+ * They used to be scattered — 0.95, 1.25, 0.80, 1.12, ... — so a card starting
+ * lower could be travelling faster than the one above it and close the gap. In
+ * 16:9 that rarely showed, because the cards were spread across 280 px of width
+ * and two that met vertically were usually side by side. In 4:5 they share one
+ * column, so any two that meet overlap, and one card's plate then covers the
+ * other's text: "Abritel · 3 nuits" was read with its heading hidden.
+ *
+ * With speed falling monotonically the gap between two neighbours can only ever
+ * widen, whatever the frame or how long the rain runs. The parallax survives —
+ * 1.25 against 0.86 is still a visible spread — but overtaking is now impossible
+ * by construction rather than by choosing the numbers carefully.
+ */
 const NOTES: [string, string, number, number, number, number][] = [
   // [platform, amount, x, y, scale, speed]
-  ['Airbnb', '412 €', 1180, 480, 0.84, 0.95],
-  ['Booking.com', '268 €', 1350, 830, 1.0, 1.25],
-  ['Abritel', '540 €', 1420, 1180, 0.90, 0.80],
-  ['Expedia', '195 €', 1140, 1340, 0.76, 1.12],
-  ['Airbnb', '327 €', 1360, 1660, 0.94, 1.05],
-  ['Booking.com', '455 €', 1230, 1980, 0.86, 0.9],
+  ['Airbnb', '412 €', 1180, 480, 0.84, 1.25],
+  ['Booking.com', '268 €', 1350, 830, 1.0, 1.15],
+  ['Abritel', '540 €', 1420, 1180, 0.90, 1.05],
+  ['Expedia', '195 €', 1140, 1340, 0.76, 0.98],
+  ['Airbnb', '327 €', 1360, 1660, 0.94, 0.92],
+  ['Booking.com', '455 €', 1230, 1980, 0.86, 0.86],
 ];
 
 const Note: React.FC<{
@@ -180,7 +215,30 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
     the right edge of a 1080 frame. In 4:5 they are re-scattered about the centre
     and tightened, since there is less width to spread across.
   */
-  const noteX = (x: number) => (tall ? W / 2 + (x - 1280) * 0.42 : x);
+  /**
+   * The rain falls in its own column, strictly to the right of the mark.
+   *
+   * It used to be re-scattered about the centre of the frame, which in 1080 put
+   * the cards across x = 253-869 while the mark sits at 238 — so cards passed
+   * straight over the logo. Centring them was the wrong instinct: in 4:5 the
+   * mark and the rain have to share the width, and the way to share it is to
+   * give each a column rather than to stack both on the middle.
+   *
+   * The column's left edge is DERIVED from the mark's settled geometry, so the
+   * clearance cannot be lost by moving the logo. Each card is then placed by its
+   * own edges: a card's centre is offset by half its scaled width, so a small
+   * card is free to wander where a large one is pinned, and none of them can
+   * cross either boundary whatever its scale.
+   */
+  const RAIN_L = W * HUB_END(tall) + MARK_SETTLED / 2 + (tall ? 34 : 0);
+  const RAIN_R = W - (tall ? 24 : 0);
+  const noteX = (x: number, s: number) => {
+    if (!tall) return x;
+    const slack = Math.max(0, RAIN_R - RAIN_L - NOTE_W * s);
+    // the original scatter, 1140-1420, remapped onto whatever slack is left
+    const t = Math.min(1, Math.max(0, (x - 1140) / 280));
+    return RAIN_L + (NOTE_W * s) / 2 + t * slack;
+  };
 
   /*
     The mark is handed over from the logo beat at 0.72 of the frame, which in
@@ -192,7 +250,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
   const ROW_W = tall ? 560 : 760;
   const ROW_X = tall ? -56 : 0;
   const hub = EASE.camera(prog(frame, HUB_FROM, HUB_TO));
-  const hubX = W * 0.72 + (W * 0.27 - W * 0.72) * hub;
+  const hubX = W * 0.72 + (W * HUB_END(tall) - W * 0.72) * hub;
   // the mark carries over from the logo beat at the size it ended on
   // the mark settles into the page on the same curve as its travel
   const markSize = 300 + (222 - 300) * hub;
@@ -293,7 +351,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
       {/* the bookings start dropping as the rows leave — no cut between them */}
       {rain > 0
         ? NOTES.filter((_, i) => i !== HERO).map(([p, a, x, y, s, sp], i) => (
-            <Note key={i} p={p} a={a} x={noteX(x)} y={y - rain * 1270 * sp} s={s} o={rainIn} />
+            <Note key={i} p={p} a={a} x={noteX(x, s)} y={y - rain * 1270 * sp} s={s} o={rainIn} />
           ))
         : null}
 
@@ -316,7 +374,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
               <Note
                 p={hp}
                 a={ha}
-                x={noteX(hx) + (W / 2 - noteX(hx)) * centre}
+                x={noteX(hx, hs) + (W / 2 - noteX(hx, hs)) * centre}
                 y={(hy - rain * 1270 * hsp) * (1 - centre) + (H / 2) * centre}
                 s={hs + (HERO_SCALE - hs) * push}
                 o={rainIn}

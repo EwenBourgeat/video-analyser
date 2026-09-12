@@ -71,7 +71,26 @@ const geom = (tall: boolean) => {
  */
 const V_IN = 44;
 const V_OUT = 6.8;
-const SETTLE = 110;
+/**
+ * The camera reaches its reading speed in 74 frames rather than 110.
+ *
+ * The whip's entry speed cannot come down — a row entering from the right still
+ * has to cross the frame — so the only way to buy reading time is to spend less
+ * of the beat coming down from it. Measured, how long each card stands fully
+ * inside the frame:
+ *
+ *            SETTLE 110   SETTLE 74
+ *   card 2      0.35 s      1.15 s
+ *   card 3      0.66 s      1.42 s
+ *   card 4+     1.42 s      1.42 s
+ *
+ * The first two cards are unchanged: they pass while the camera is still near 44
+ * whatever the curve does, because the whip has to put them there. What changes
+ * is that the beat settles into its reading cadence at the third card instead of
+ * the fifth. Six or seven cards used to cross in the four seconds; now it is
+ * five, each one held long enough to read.
+ */
+const SETTLE = 74;
 
 /**
  * Where the camera stands on this beat's first frame — read from the travelling
