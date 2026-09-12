@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C} from '../../intendant/theme';
+import {C, SERIF} from '../../intendant/theme';
+import {Exposure} from '../components/Exposure';
 import {useStage, clockGeom} from '../format';
 import {Paper} from '../components/Grounds';
 import {keyframes, prog, softOut} from '../../ease';
@@ -63,7 +64,7 @@ const sweepAt = (f: number) => (f / 60) * SWEEP_DPS;
  * last dot goes out just before the disc starts migrating onto the clock face:
  * an earlier start left the compass sitting empty for a second and a half.
  */
-const SCAN_FROM = 72;
+const SCAN_FROM = 80;
 /** How long a dot takes to go out once the head has reached it. */
 const SNUFF = 7;
 
@@ -92,6 +93,28 @@ const PINS: [number, number][] = [
   [0.55, 8], [0.86, -58], [0.41, 132], [0.73, -6],
 ];
 
+/**
+ * Frame at which the sweep head FIRST reaches this bearing, from f0.
+ *
+ * This is the change that makes the beat read as a radar rather than as a map
+ * being rubbed out. A PPI display has no targets until the sweep finds them:
+ * the beam crosses an echo, the echo flares, and the phosphor holds it until the
+ * beam comes round again. The dots here used to be lit in advance on a stagger
+ * that had nothing to do with the sweep, so the only thing the sweep ever did
+ * was destroy — the disc was full before the instrument had looked at anything.
+ *
+ * Now the first revolution paints the field in under the beam, and the pass from
+ * SCAN_FROM clears it for the morph onto the clock. One instrument, two passes.
+ */
+const birthOf = (bearing: number) =>
+  ((((bearing % 360) + 360) % 360) / SWEEP_DPS) * 60;
+
+/** How an echo behaves once the beam has found it. */
+const FLARE = 3;
+const DECAY = 16;
+/** The level the phosphor settles back to, and holds until the clearing pass. */
+const STANDING = 0.62;
+
 /** Frame at which the sweep head first reaches this bearing after SCAN_FROM. */
 const deathOf = (bearing: number) => {
   const head = sweepAt(SCAN_FROM);
@@ -99,8 +122,16 @@ const deathOf = (bearing: number) => {
   return SCAN_FROM + (wait / SWEEP_DPS) * 60;
 };
 
-/** Dots light up in bearing order early on, so the field fills in as a scan too. */
-const litOf = (i: number, n: number) => 8 + (i / n) * 40;
+/** Brightness of one echo: dark, flare, decay, standing level, then cleared. */
+const echoAt = (frame: number, bearing: number) => {
+  const birth = birthOf(bearing);
+  if (frame < birth) return 0;
+  const up = prog(frame, birth, birth + FLARE);
+  const fall = prog(frame, birth + FLARE, birth + FLARE + DECAY);
+  const level = up * (1 - (1 - STANDING) * fall);
+  const death = deathOf(bearing);
+  return level * (1 - prog(frame, death, death + SNUFF));
+};
 
 const Pin: React.FC<{x: number; y: number; s: number; o: number}> = ({x, y, s, o}) => (
   <g opacity={o} transform={`translate(${x} ${y}) scale(${s})`} filter="url(#pinGlow)">
@@ -150,7 +181,7 @@ export const MapPins: React.FC<{frame: number}> = ({frame}) => {
       return `${CX + Math.cos(t) * r * 1.16} ${CY + Math.sin(t) * r * 1.16}`;
     };
     // brightest at the head, gone at the end of the tail
-    const op = 0.16 * Math.pow(1 - i / SLICES, 1.7);
+    const op = 0.30 * Math.pow(1 - i / SLICES, 1.7);
     return (
       <path
         key={i}
@@ -185,6 +216,31 @@ export const MapPins: React.FC<{frame: number}> = ({frame}) => {
         <circle cx={CX} cy={CY} r={r} fill="url(#cityFill)" />
         <circle cx={CX} cy={CY} r={r * 0.7} fill="url(#cityFill)" opacity={0.85} />
         <circle cx={CX} cy={CY} r={r * 0.42} fill="url(#cityFill)" opacity={0.85} />
+        {/*
+          Azimuth graduations. Short every 10 degrees, long every 30 — the
+          marking a plan-position indicator carries around its rim, and the one
+          detail that says "instrument" without costing any legibility, because
+          it lives on the edge where nothing else is.
+        */}
+        <g opacity={0.5}>
+          {Array.from({length: 36}, (_, k) => {
+            const a = (k * 10 * Math.PI) / 180;
+            const long = k % 3 === 0;
+            const r0 = r * (long ? 0.945 : 0.968);
+            return (
+              <line
+                key={k}
+                x1={CX + Math.cos(a) * r0}
+                y1={CY + Math.sin(a) * r0}
+                x2={CX + Math.cos(a) * r}
+                y2={CY + Math.sin(a) * r}
+                stroke={C.blue600}
+                strokeOpacity={long ? 0.5 : 0.28}
+                strokeWidth={long ? 2.4 : 1.4}
+              />
+            );
+          })}
+        </g>
         {ring(1, 0.55, 2.2)}
         {ring(0.7, 0.42, 1.8)}
         {ring(0.42, 0.36, 1.6)}
@@ -219,19 +275,75 @@ export const MapPins: React.FC<{frame: number}> = ({frame}) => {
         <g clipPath="url(#cityClip)" filter="url(#sweepBlur)">
           {Array.from({length: SLICES}, (_, i) => slice(i))}
         </g>
+        {/*
+          The leading edge, drawn hard and unblurred.
+          The tail alone was not enough: it is a soft wash on an already pale
+          disc, so the beam read as a faint smudge rather than as the thing doing
+          the looking. A radar's sweep has a crisp edge with the glow behind it —
+          the edge is what the eye tracks, and it is what makes the echoes read as
+          being FOUND rather than merely appearing.
+        */}
+        <g clipPath="url(#cityClip)">
+          <line
+            x1={CX}
+            y1={CY}
+            x2={CX + Math.cos((head * Math.PI) / 180) * r * 1.16}
+            y2={CY + Math.sin((head * Math.PI) / 180) * r * 1.16}
+            stroke={C.blue600}
+            strokeOpacity={0.5}
+            strokeWidth={2.6}
+          />
+        </g>
 
         {PINS.map(([rf, ang], i) => {
-          // it lights up on the stagger, and the sweep head is what puts it out
-          const lit = prog(frame, litOf(i, PINS.length), litOf(i, PINS.length) + 12);
-          const o = lit * (1 - prog(frame, deathOf(ang), deathOf(ang) + SNUFF));
+          // the beam paints it in, holds it, and the next pass clears it
+          const o = echoAt(frame, ang);
           if (o <= 0.01) return null;
           const rad = (ang * Math.PI) / 180;
-          const s = (0.8 + 0.2 * o) * Math.pow(r / 470, 0.35) * 1.35;
+          /*
+           * The flare is a SIZE as well as a brightness: an echo the beam has
+           * just crossed is momentarily bigger. Keyed off how far past its birth
+           * the frame is rather than off `o`, because `o` also falls when the
+           * clearing pass arrives, and an echo going out should not swell again.
+           */
+          const fresh = 1 - prog(frame, birthOf(ang), birthOf(ang) + FLARE + DECAY);
+          const s = (0.86 + 0.34 * fresh) * Math.pow(r / 470, 0.35) * 1.35;
           const px = CX + Math.cos(rad) * r * rf;
           const py = CY + Math.sin(rad) * r * rf;
           return <Pin key={i} x={px} y={py} s={s} o={o} />;
         })}
       </svg>
+
+      {/*
+        The hook. A Meta feed gives an ad about one second to say who it is for,
+        so this is the first thing on screen and it qualifies rather than teases:
+        a Toulouse owner knows in four words that the film is addressed to them.
+        It is revealed with `Exposure`, the same gesture as the film's other two
+        sentences to the viewer, and it leaves before the disc starts its morph
+        onto the clock face.
+      */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: W,
+          height: tall ? 0.30 * H : 0.26 * H,
+        }}
+      >
+        <Exposure
+          frame={frame}
+          rows={['Propriétaire à Toulouse', 'ou alentours ?']}
+          from={4}
+          reveal={46}
+          exitFrom={130}
+          exitTo={158}
+          fontSize={tall ? 74 : 64}
+          font={SERIF}
+          ground="light"
+          soft={11}
+        />
+      </div>
     </AbsoluteFill>
   );
 };

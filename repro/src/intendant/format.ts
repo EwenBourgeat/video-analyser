@@ -51,32 +51,19 @@ export const clockGeom = (w: number, h: number, tall: boolean) => ({
   cy: tall ? 0.75 * h : 0.895 * h,
 });
 
-/**
- * Where the travelling's thread front sits on screen.
+/*
+ * `frontOf`, `X0` and `cruiseBase` used to live here.
  *
- * 60 % of the way across in 16:9 (1150), but 82 % in 4:5 (886). A station is
- * legible from the moment it arrives at this column until it leaves the left
- * edge, so in a frame 840 px narrower the same fraction would cut its readable
- * life from 2.2 s to 1.1 s. Bringing the column closer to the right edge buys
- * that time back; it is affordable because in 4:5 the label sits UNDER the tile
- * rather than beside it, so nothing extends past the arrival column.
+ * They existed to solve one problem: the travelling drew a thread up to a fixed
+ * column of the frame, and a station had to be at world x = 700 when the thread
+ * reached it, so the camera offset had to be derived from that column — and the
+ * column itself had to differ between the two frames (60 % in 16:9, 82 % in 4:5)
+ * to give a station a comparable readable life in each.
  *
- * 82 % is the ceiling: the label is 380 wide and centred on the tile, so at 85 %
- * its right edge would already be 28 px outside the frame when the station
- * arrives. Measured, a label is fully legible for 1.36 s at 82 % against 1.64 s
- * in 16:9 — the closest the narrow frame allows without cutting it on arrival.
+ * The services beat no longer works that way. A step is a full-frame panel and
+ * the panel pitch IS the frame width, so there is no arrival column to hit and
+ * no offset to solve: the camera rests at i * w and the panel fills the picture,
+ * in either format, with nothing to tune. Deleting them is what that change is
+ * worth — the numbers were correct, but they were answers to a question the film
+ * stopped asking.
  */
-export const frontOf = (w: number, tall: boolean) =>
-  Math.round(w * (tall ? 0.82 : 0.599));
-
-/**
- * The camera offset that makes the stations arrive exactly on time.
- *
- * The travelling is timed so the thread reaches station i at a known frame, and
- * the thread is drawn at `camX + FRONT`. Station 01 stands at world x = 700, so
- * at the first arrival the camera must be at `700 - FRONT`. Deriving it keeps
- * the arrivals exact in both frames — the 16:9 value was the hand-tuned -450,
- * which is exactly 700 - 1150.
- */
-export const X0 = 700;
-export const cruiseBase = (w: number, tall: boolean) => X0 - frontOf(w, tall);
