@@ -126,18 +126,30 @@ export const W_BOLD = 700;
  * after its reveal finishes.
  */
 export const T = {
-  map: {from: 0, to: 190},
-  clock: {from: 150, to: 462},
-  browser: {from: 300, to: 462},
-  metier: {from: 466, to: 684},
-  journey: {from: 684, to: 964},
-  reviews: {from: 964, to: 1204},
-  key: {from: 1204, to: 1324},
-  logo: {from: 1324, to: 1396},
-  diffusion: {from: 1396, to: 1706},
-  calendar: {from: 1706, to: 1936},
-  simple: {from: 1936, to: 2096},
-  endcard: {from: 2096, to: 2342},
+  /*
+   * Two beats were lengthened in this pass and everything after each of them
+   * moves with it: the radar gains 30 frames (0,5 s) and the reviews gain 120
+   * (2 s). The numbers below already carry those shifts.
+   *
+   * This table is now genuinely the single source of truth it always claimed to
+   * be. It was not, until this pass: a dozen scenes carried their own literal
+   * start frame and a scattering of absolute `prog(frame, 352, 404)` calls, so
+   * lengthening a beat meant finding and moving some sixty numbers by hand —
+   * the kind of edit where one missed number shows up as a scene that starts
+   * half a second late and nothing says why. Every scene now derives from here.
+   */
+  map: {from: 0, to: 220},
+  clock: {from: 180, to: 492},
+  browser: {from: 330, to: 492},
+  metier: {from: 496, to: 714},
+  journey: {from: 714, to: 994},
+  reviews: {from: 994, to: 1354},
+  key: {from: 1354, to: 1474},
+  logo: {from: 1474, to: 1546},
+  diffusion: {from: 1546, to: 1856},
+  calendar: {from: 1856, to: 2086},
+  simple: {from: 2086, to: 2246},
+  endcard: {from: 2246, to: 2492},
 } as const;
 
-export const TOTAL_FRAMES = 2342; // 39,0 s
+export const TOTAL_FRAMES = 2492; // 41,5 s

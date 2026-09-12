@@ -1,5 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
+import {T} from '../theme';
 import {useStage} from '../format';
 import {Paper} from '../components/Grounds';
 import {Mark} from '../components/Brand';
@@ -22,7 +23,7 @@ import {ramp, softOut, softOutQuint, prog} from '../../ease';
  * everywhere else.
  */
 
-const FROM = 1324;
+const FROM = T.logo.from;
 const MARK = 300;
 
 /**

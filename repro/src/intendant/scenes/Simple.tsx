@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SERIF} from '../theme';
+import {C, SERIF, T} from '../theme';
 import {useStage} from '../format';
 import {Paper} from '../components/Grounds';
 import {Mark} from '../components/Brand';
@@ -17,7 +17,7 @@ import {EASE} from '../../bezier';
  * it keeps its full 94 px.
  */
 
-const FROM = 1936;
+const FROM = T.simple.from;
 
 /**
  * Where the transition disc lands, derived from the frame rather than fixed at
@@ -63,7 +63,7 @@ export const Simple: React.FC<{frame: number}> = ({frame}) => {
   const p2 = EASE.entrance(prog(frame, FROM + 62, FROM + 104));
   // the transition disc contracts onto the badge and hands it over here
   // the contracting disc dissolves over 1996-2010; the diamond rises into it
-  const badge = prog(frame, 1996, 2012);
+  const badge = prog(frame, FROM + 60, FROM + 76);
 
   const type: React.CSSProperties = {
     position: 'absolute',

@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SERIF} from '../../intendant/theme';
+import {C, SERIF, T} from '../../intendant/theme';
 import {Exposure} from '../components/Exposure';
 import {useStage, clockGeom} from '../format';
 import {Paper} from '../components/Grounds';
@@ -47,7 +47,15 @@ const radiusTable = (() => {
       t = [
         [0, 980], [12, 960], [16, 900], [22, 760], [28, 640], [34, 560],
         [40, 505], [46, 472], [52, 458], [64, 452], [90, 462], [120, 486],
-        [150, 508], [172, 520], [190, clockR],
+        /*
+         * The tail is anchored to the END of the beat, not to a literal 190.
+         * Everything before 120 is the disc settling and is absolute; everything
+         * from here is the migration onto the clock face, which has to finish
+         * exactly when the beat does. Lengthening the radar therefore lengthens
+         * the HOLD between 120 and here, which is the part worth watching, and
+         * leaves the morph the same duration it was tuned at.
+         */
+        [T.map.to - 40, 508], [T.map.to - 18, 520], [T.map.to, clockR],
       ];
       cache.set(clockR, t);
     }
@@ -157,9 +165,9 @@ export const MapPins: React.FC<{frame: number}> = ({frame}) => {
   const r = keyframes(frame, radiusTable(CLOCK_R));
   const head = sweepAt(frame);
   // slide the disc onto the dial's centre as it dissolves — a morph, not a cut
-  const morph = softOut(prog(frame, 150, 190));
+  const morph = softOut(prog(frame, T.map.to - 40, T.map.to));
   const CY = (H / 2 + 6) + (CLOCK_CY - (H / 2 + 6)) * morph;
-  const out = 1 - prog(frame, 156, 190);
+  const out = 1 - prog(frame, T.map.to - 34, T.map.to);
 
   const ring = (k: number, op: number, sw: number) => (
     <circle
@@ -336,8 +344,8 @@ export const MapPins: React.FC<{frame: number}> = ({frame}) => {
           rows={['Propriétaire à Toulouse', 'ou alentours ?']}
           from={4}
           reveal={46}
-          exitFrom={130}
-          exitTo={158}
+          exitFrom={T.map.to - 60}
+          exitTo={T.map.to - 32}
           fontSize={tall ? 74 : 64}
           font={SERIF}
           ground="light"

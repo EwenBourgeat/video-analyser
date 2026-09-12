@@ -1,5 +1,5 @@
 import React from 'react';
-import {C, SANS, SERIF, W_MED} from '../theme';
+import {C, SANS, SERIF, W_MED, T} from '../theme';
 import {useStage, clockGeom} from '../format';
 import {ramp, prog} from '../../ease';
 import {EASE} from '../../bezier';
@@ -24,7 +24,7 @@ const RISE = 0.055;
 const SLICES = 13;
 
 /** Beat time, in seconds, at which the browser takes the dial over (frame 300). */
-const SPIN_FREEZE = (300 - 150) / 60;
+const SPIN_FREEZE = (T.browser.from - T.clock.from) / 60;
 /** The rate reached there — d/dt (60t + 23t^2) — and held from then on. */
 const SPIN_RATE = 60 + 46 * SPIN_FREEZE;
 
@@ -33,7 +33,7 @@ const Clock: React.FC<{frame: number}> = ({frame}) => {
   const dial = clockGeom(w, h, tall);
   const cx = dial.cx;
   // it settles upward onto its resting centre over the first second
-  const cy = ramp(frame, [150, 208], [dial.cy + RISE * h, dial.cy], EASE.smooth);
+  const cy = ramp(frame, [T.clock.from, T.clock.from + 58], [dial.cy + RISE * h, dial.cy], EASE.smooth);
   const r = dial.r;
   const ring = r * 0.075;
   const faceR = r - ring;
@@ -51,7 +51,7 @@ const Clock: React.FC<{frame: number}> = ({frame}) => {
    * second hand per second — legible — and accelerates into a smear.
    */
   const spinAt = (f: number) => {
-    const t = Math.max(0, (f - 150) / 60);
+    const t = Math.max(0, (f - T.clock.from) / 60);
     /**
      * Eight times slower than it was. The old law reached 45 revolutions of the
      * second hand PER SECOND by the end of the beat, and already ran at 3.3 at
@@ -174,11 +174,18 @@ export const ClockStage: React.FC<{frame: number}> = ({frame}) => {
     >
       <Kinetic
         frame={frame}
-        from={172}
-        to={368}
+        from={T.clock.from + 22}
+        to={T.clock.from + 218}
         fontSize={tall ? 70 : 72}
-        font={SERIF}
-        weight={400}
+        /*
+         * Futura, not Didot. The question and the line under it — "Messages,
+         * ménage, tarifs, imprévus." — are one thought said twice, and they were
+         * set in two different faces, which read as two unrelated captions
+         * stacked. Didot is reserved for the film's three STATEMENTS; this beat
+         * asks something, and it now asks it in the same voice it answers in.
+         */
+        font={SANS}
+        weight={W_MED}
         letterSpacing="-0.012em"
         maxWidth={tall ? 940 : undefined}
         segments={[
@@ -200,7 +207,7 @@ export const ClockStage: React.FC<{frame: number}> = ({frame}) => {
         fontSize: 32,
         letterSpacing: '-0.01em',
         color: C.muted,
-        opacity: EASE.entrance(prog(frame, 352, 404)),
+        opacity: EASE.entrance(prog(frame, T.clock.from + 202, T.clock.from + 254)),
       }}
     >
       Messages, ménage, tarifs, imprévus.

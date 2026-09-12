@@ -24,9 +24,12 @@ import {Ink} from './components/Grounds';
 */
 
 /** Radius of the disc that carries the calendar -> payoff transition. */
+const MORPH_OPEN = T.calendar.to - 20;
+const MORPH_PEAK = T.calendar.to + 12;
+const MORPH_LAND = T.simple.from + 74;
 const MORPH_R = (f: number) => {
-  if (f <= 1948) return 1400 * inCubic(prog(f, 1916, 1948));   // the pill floods out
-  return 1400 + (32 - 1400) * softOut(prog(f, 1952, 2010));    // and contracts to the badge
+  if (f <= MORPH_PEAK) return 1400 * inCubic(prog(f, MORPH_OPEN, MORPH_PEAK)); // floods out
+  return 1400 + (32 - 1400) * softOut(prog(f, MORPH_PEAK + 4, MORPH_LAND));    // onto the badge
 };
 
 const In: React.FC<{from: number; to: number; frame: number; children: React.ReactNode}> = ({
@@ -55,7 +58,7 @@ export const Intendant: React.FC = () => {
       {/* the clock runs full-bleed, then becomes the browser's content.
           It dissolves in over the same window the compass dissolves out. */}
       <In from={T.clock.from} to={T.browser.from} frame={frame}>
-        <div style={{position: 'absolute', inset: 0, opacity: softOut(prog(frame, 150, 190))}}>
+        <div style={{position: 'absolute', inset: 0, opacity: softOut(prog(frame, T.map.to - 40, T.map.to))}}>
           <ClockStage frame={frame} />
         </div>
       </In>
@@ -98,7 +101,7 @@ export const Intendant: React.FC = () => {
         contracts onto the check badge of the next line. The button becomes the
         badge — the transition is one object changing size, not a cut.
       */}
-      {frame >= 1916 && frame <= 2010 ? (
+      {frame >= MORPH_OPEN && frame <= MORPH_LAND ? (
         <AbsoluteFill style={{pointerEvents: 'none'}}>
           <div
             style={{
@@ -118,7 +121,7 @@ export const Intendant: React.FC = () => {
                 it finishes contracting and the brand's diamond, which `Simple`
                 fades in over exactly this window, is what it leaves behind.
               */
-              opacity: 1 - prog(frame, 1996, 2010),
+              opacity: 1 - prog(frame, MORPH_LAND - 14, MORPH_LAND),
             }}
           />
         </AbsoluteFill>

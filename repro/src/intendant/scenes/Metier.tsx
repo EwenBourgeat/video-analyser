@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {SERIF} from '../theme';
+import {SERIF, T} from '../theme';
 import {useStage} from '../format';
 import {Ink} from '../components/Grounds';
 import {Exposure} from '../components/Exposure';
@@ -13,8 +13,8 @@ import {Exposure} from '../components/Exposure';
  * and they are meant to read as the same gesture.
  */
 
-const FROM = 466;
-const TO = 684;
+const FROM = T.metier.from;
+const TO = T.metier.to;
 
 /** The wave crosses the whole sentence in this many frames — 2.5 s. */
 const REVEAL = 150;

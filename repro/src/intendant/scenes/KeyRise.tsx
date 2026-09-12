@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {SERIF} from '../theme';
+import {SERIF, T} from '../theme';
 import {Ink, Paper} from '../components/Grounds';
 import {Exposure} from '../components/Exposure';
 import {prog} from '../../ease';
@@ -24,16 +24,25 @@ import {EASE} from '../../bezier';
  * white outright would put a sixty-point luminance step at each one.
  */
 
-const FROM = 1204;
-const TO = 1324;
+const FROM = T.key.from;
+const TO = T.key.to;
 
 /** The wave crosses the line in this many frames. */
-const REVEAL = 52;
-const REVEAL_FROM = FROM + 10;
+/**
+ * Bigger, sooner, and held longer — this is the line the film is FOR.
+ *
+ * Size is the lever that actually reads as emphasis in type; 92 px made it one
+ * statement among three, at 118 it is the largest thing in the film. Starting
+ * the reveal four frames earlier and running it six frames faster buys the extra
+ * hold without touching the beat's length, so nothing downstream moves: the line
+ * now stands fully resolved for 0,67 s instead of 0,47.
+ */
+const REVEAL = 46;
+const REVEAL_FROM = FROM + 6;
 
 /** The line goes back out of focus before the ground starts to darken. */
-const EXIT_FROM = 1288;
-const EXIT_TO = 1306;
+const EXIT_FROM = FROM + 92;
+const EXIT_TO = FROM + 108;
 
 /**
  * Ground: up to white once the cut has landed — and it STAYS there.
@@ -85,7 +94,7 @@ export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
         reveal={REVEAL}
         exitFrom={EXIT_FROM}
         exitTo={EXIT_TO}
-        fontSize={92}
+        fontSize={118}
         font={SERIF}
         ground="light"
         soft={SOFT}

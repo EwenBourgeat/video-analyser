@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SANS, MONO, W_MED, W_BOLD} from '../theme';
+import {C, SANS, MONO, W_MED, W_BOLD, T} from '../theme';
 import {useStage} from '../format';
 import {Paper} from '../components/Grounds';
 import {Mark} from '../components/Brand';
@@ -24,14 +24,14 @@ import {EASE} from '../../bezier';
  * here, which is exactly what the beat says.
  */
 
-const FROM = 1396;
-const TO = 1706;
+const FROM = T.diffusion.from;
+const TO = T.diffusion.to;
 /**
  * The rain waits until the mark is well past the middle and heading left — much
  * later than it used to start. It cannot wait for the mark to stop, though: the
  * rows are gone by then, and holding both back left twenty frames of empty page.
  */
-const HANDOVER = 1576;
+const HANDOVER = FROM + 180;
 
 const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
 
@@ -42,14 +42,14 @@ const ROWS = ['Airbnb', 'Booking.com', 'Abritel', 'Expedia'];
  * character — "pas assez fluide". It is now a single Bezier move: it leaves
  * slowly, crosses with real speed, and settles long on the left.
  */
-const HUB_FROM = 1492;
+const HUB_FROM = FROM + 96;
 /**
  * The mark finishes travelling exactly as the rain begins (HANDOVER), not 28
  * frames after it. The rain's column is derived from where the mark comes to
  * rest, so the mark has to BE there before the first card is drawn — otherwise
  * the bound is computed against a position the mark has not reached yet.
  */
-const HUB_TO = 1576;
+const HUB_TO = FROM + 180;
 
 /**
  * The push-through. On the last 44 frames one booking card stops rising, centres
@@ -62,7 +62,7 @@ const HUB_TO = 1576;
  * made the two beats read as separate scenes rather than one continuous move.
  * The beat is 40 frames shorter as well, so the wait is now 72 frames.
  */
-const PUSH_FROM = 1662;
+const PUSH_FROM = FROM + 266;
 /**
  * Which booking becomes the doorway — chosen by measurement, not by eye. At the
  * frame the push begins the six notes sit at y = -196, -59, 611, 543, 913 and
@@ -76,7 +76,8 @@ const HERO = 3;
 const HERO_SCALE = 14;
 
 const ROWS_X: [number, number][] = [
-  [1396, 96], [1488, 96], [1522, -220], [1554, -900], [1582, -1300], [1706, -1400],
+  [FROM, 96], [FROM + 92, 96], [FROM + 126, -220], [FROM + 158, -900],
+  [FROM + 186, -1300], [TO, -1400],
 ];
 
 const Spinner: React.FC<{size: number; frame: number}> = ({size, frame}) => (
@@ -258,7 +259,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
   // so the two scenes share one position at the cut
   const markY = H / 2 - 44 * (1 - hub);
   const rowsX = keyframes(frame, ROWS_X);
-  const rowsOut = 1 - prog(frame, 1558, 1584);
+  const rowsOut = 1 - prog(frame, FROM + 162, FROM + 188);
   const rain = prog(frame, HANDOVER, TO);
   const rainIn = EASE.entrance(prog(frame, HANDOVER, HANDOVER + 34));
   /**

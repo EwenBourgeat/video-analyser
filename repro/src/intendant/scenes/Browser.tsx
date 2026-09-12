@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C} from '../theme';
+import {C, T} from '../theme';
 import {useStage} from '../format';
 import {ramp, inCubic, prog} from '../../ease';
 import {EASE} from '../../bezier';
@@ -22,8 +22,8 @@ const TITLEBAR = 52;
  * same 80 frames (1.34 s) it takes there. It used to be a generic camera ease
  * over 96 frames, which is what made this cut feel abrupt at the front.
  */
-const PULL_FROM = 300;
-const PULL_TO = 380;
+const PULL_FROM = T.browser.from;
+const PULL_TO = T.browser.from + 80;
 
 export const Browser: React.FC<{frame: number}> = ({frame}) => {
   /*
@@ -51,7 +51,9 @@ export const Browser: React.FC<{frame: number}> = ({frame}) => {
    * exit — the abruptness was a sliced object, not a timing problem. 940 px,
    * finished by f458, leaves three clear frames before the boundary.
    */
-  const exitY = frame > 418 ? ramp(frame, [418, 458], [0, 940], EASE.exit) : 0;
+  const EXIT_FROM = T.browser.to - 44;
+  const exitY =
+    frame > EXIT_FROM ? ramp(frame, [EXIT_FROM, EXIT_FROM + 40], [0, 940], EASE.exit) : 0;
 
   const left = W / 2 - pageW / 2;
   const top = pageTop + exitY;

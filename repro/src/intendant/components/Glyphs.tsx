@@ -6,6 +6,7 @@ export type GlyphName =
   | 'chart'
   | 'key'
   | 'sparkle'
+  | 'spray'
   | 'report'
   | 'star'
   | 'phone';
@@ -36,6 +37,23 @@ const paths: Record<GlyphName, React.ReactNode> = {
     <>
       <path d="M12 1.8l2.2 6.1 6.1 2.2-6.1 2.2-2.2 6.1-2.2-6.1-6.1-2.2 6.1-2.2Z" />
       <path d="M18.9 15.2l1.1 3 3 1.1-3 1.1-1.1 3-1.1-3-3-1.1 3-1.1Z" />
+    </>
+  ),
+  /*
+   * The housekeeping step used to carry `sparkle`, which is the generic "clean"
+   * asterisk and says nothing a star does not. A spray bottle names the work.
+   */
+  spray: (
+    <>
+      <rect x="5.6" y="9.4" width="10.4" height="12.6" rx="2.4" />
+      <rect x="8.6" y="6.6" width="4.4" height="3.2" />
+      <rect x="7.8" y="3.6" width="6" height="3.2" rx="1" />
+      <rect x="13.8" y="4.2" width="3.6" height="2" rx="0.8" />
+      <path d="M7.8 6.8H5.4a1.4 1.4 0 0 0-1.4 1.4v1.4h2.2V8.4h1.6Z" />
+      <rect x="7.6" y="12.6" width="6.4" height="4.6" rx="1" fill="#fff" />
+      <circle cx="19.7" cy="2.9" r="1.05" />
+      <circle cx="21.5" cy="5.5" r="0.85" />
+      <circle cx="19.3" cy="7.6" r="0.7" />
     </>
   ),
   report: (
