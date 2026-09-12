@@ -1,9 +1,10 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SANS, W_BOLD, T} from '../theme';
+import {C, SANS, SERIF, W_BOLD, T} from '../theme';
 import {useStage} from '../format';
 import {Ink} from '../components/Grounds';
 import {Glyph, GlyphName} from '../components/Glyphs';
+import {Exposure} from '../components/Exposure';
 import {prog} from '../../ease';
 import {EASE} from '../../bezier';
 
@@ -81,14 +82,25 @@ const ROW_DUR = 36;
 /** How far outside the frame a row starts, in multiples of the frame width. */
 const OFFSTAGE = 1.05;
 
+/**
+ * The line that closes the beat, under the three rows.
+ *
+ * It arrives AFTER the last row has landed, so the beat reads as three things
+ * being listed and then answered, rather than as a title with a list under it.
+ * And it is revealed with `Exposure` — the film's statement gesture — where the
+ * rows snap in: the contrast between a hard arrival and a soft resolve is what
+ * marks it as the conclusion rather than as a fourth item.
+ */
+const LINE_FROM = ROW_IN + 2 * ROW_STEP + ROW_DUR + 8;
+
 export const Journey: React.FC<{frame: number}> = ({frame}) => {
   const {w: W, h: H, tall} = useStage();
   const camX = camXAt(frame, W, tall);
   const whiteness = EASE.entrance(prog(frame, WHITE_IN[0], WHITE_IN[1]));
 
   const S = tall
-    ? {tile: 190, radius: 50, gap: 30, label: 58, num: 27, rowY: [0.285, 0.5, 0.715]}
-    : {tile: 170, radius: 46, gap: 28, label: 52, num: 25, rowY: [0.26, 0.5, 0.74]};
+    ? {tile: 190, radius: 50, gap: 30, label: 58, num: 27, rowY: [0.25, 0.45, 0.65], line: 64}
+    : {tile: 170, radius: 46, gap: 28, label: 52, num: 25, rowY: [0.24, 0.46, 0.68], line: 56};
   /*
    * Sized to the longest label rather than generously: at 380 the row measured
    * 600 px but its ink stopped at 500, so centring the BOX left the block
@@ -166,8 +178,20 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
                 justifyContent: 'center',
               }}
             >
-              {/* cream on burgundy: 11.4:1, far past the 3:1 a UI element needs */}
-              <Glyph name={s.glyph} size={S.tile * 0.5} color={C.cream} />
+              {/*
+                White, not the charter's cream — and the reason is measured
+                rather than aesthetic.
+                Cream on this tile is 13,8:1, so contrast was never the problem.
+                What made the symbols read as dull grey is that cream is 21 %
+                DARKER than the white page they sit beside: against a surround
+                the eye has adapted to as white, anything below it reads as grey.
+                At #FFFFFF the gap is 0 % and the symbol reads as a hole punched
+                through the tile, which is what it is. 17,1:1 on the tile.
+                It is also drawn slightly larger — 54 % of the tile against 50 —
+                because a dark surface eats thin features, so a glyph needs more
+                of the box on burgundy than it does on paper.
+              */}
+              <Glyph name={s.glyph} size={S.tile * 0.54} color="#FFFFFF" counter={C.deep} />
             </div>
 
             <div style={{width: labelW}}>
@@ -209,6 +233,40 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
           </div>
         );
       })}
+
+      {/*
+        Carried by -camX like the rows, so the run-out takes it out of frame with
+        them. Anything left standing while the camera leaves would still be on
+        screen at the cut the reviews land on.
+      */}
+      <div
+        style={{
+          position: 'absolute',
+          left: -camX,
+          top: (tall ? 0.78 : 0.80) * H,
+          width: W,
+          height: (tall ? 0.16 : 0.15) * H,
+        }}
+      >
+        {/*
+          The accent, not the ink. This is the beat's conclusion, and Didot in
+          #941101 carries that without competing with the Futura labels, which
+          hold the frame by weight rather than by colour.
+        */}
+        <Exposure
+          frame={frame}
+          rows={['On s’occupe de tout.']}
+          from={LINE_FROM}
+          reveal={34}
+          exitFrom={RUSH_FROM}
+          exitTo={RUSH_FROM + 20}
+          fontSize={S.line}
+          font={SERIF}
+          ground="light"
+          accentRow={0}
+          soft={10}
+        />
+      </div>
     </AbsoluteFill>
   );
 };

@@ -11,11 +11,22 @@ export type GlyphName =
   | 'star'
   | 'phone';
 
-const paths: Record<GlyphName, React.ReactNode> = {
+/**
+ * The counters — the lens of the camera, the hole in the key's bow, the label on
+ * the bottle — are the colour BEHIND the glyph, not white.
+ *
+ * They were hardcoded to `#fff`, which was right only as long as a glyph sat on
+ * a pale card: the counter then matched the card and read as a hole. On a
+ * burgundy tile it painted an actual white shape inside a cream glyph, so the
+ * lens and the keyhole stopped reading as openings and became flat highlights a
+ * shade off the body they sit in. Passing the surface in makes them holes again
+ * in any context.
+ */
+const paths = (counter: string): Record<GlyphName, React.ReactNode> => ({
   camera: (
     <>
       <path d="M3.4 7.6h3.4l1.5-2.3h7.4l1.5 2.3h3.4a1.8 1.8 0 0 1 1.8 1.8v8.4a1.8 1.8 0 0 1-1.8 1.8H3.4a1.8 1.8 0 0 1-1.8-1.8V9.4a1.8 1.8 0 0 1 1.8-1.8Z" />
-      <circle cx="12" cy="13.4" r="4.6" fill="#fff" />
+      <circle cx="12" cy="13.4" r="4.6" fill={counter} />
       <circle cx="12" cy="13.4" r="2.6" />
     </>
   ),
@@ -29,7 +40,7 @@ const paths: Record<GlyphName, React.ReactNode> = {
   key: (
     <>
       <circle cx="7.6" cy="8.4" r="5.4" />
-      <circle cx="7.6" cy="8.4" r="2.1" fill="#fff" />
+      <circle cx="7.6" cy="8.4" r="2.1" fill={counter} />
       <path d="M10.9 11.7 21 21.8l-2.4 0-1.6-1.6-1.7 1.7-1.9-1.9 1.7-1.7-1.7-1.7-2.3 2.3-2.3-2.3Z" />
     </>
   ),
@@ -50,7 +61,7 @@ const paths: Record<GlyphName, React.ReactNode> = {
       <rect x="7.8" y="3.6" width="6" height="3.2" rx="1" />
       <rect x="13.8" y="4.2" width="3.6" height="2" rx="0.8" />
       <path d="M7.8 6.8H5.4a1.4 1.4 0 0 0-1.4 1.4v1.4h2.2V8.4h1.6Z" />
-      <rect x="7.6" y="12.6" width="6.4" height="4.6" rx="1" fill="#fff" />
+      <rect x="7.6" y="12.6" width="6.4" height="4.6" rx="1" fill={counter} />
       <circle cx="19.7" cy="2.9" r="1.05" />
       <circle cx="21.5" cy="5.5" r="0.85" />
       <circle cx="19.3" cy="7.6" r="0.7" />
@@ -59,9 +70,9 @@ const paths: Record<GlyphName, React.ReactNode> = {
   report: (
     <>
       <path d="M5.4 2.4h8.2l5.4 5.4v13.8a1.8 1.8 0 0 1-1.8 1.8H5.4a1.8 1.8 0 0 1-1.8-1.8V4.2a1.8 1.8 0 0 1 1.8-1.8Z" />
-      <path d="M13.6 2.4 19 7.8h-5.4Z" fill="#fff" opacity="0.55" />
-      <rect x="7" y="12" width="4" height="7" rx="1" fill="#fff" />
-      <rect x="12.6" y="9.2" width="4" height="9.8" rx="1" fill="#fff" />
+      <path d="M13.6 2.4 19 7.8h-5.4Z" fill={counter} opacity="0.55" />
+      <rect x="7" y="12" width="4" height="7" rx="1" fill={counter} />
+      <rect x="12.6" y="9.2" width="4" height="9.8" rx="1" fill={counter} />
     </>
   ),
   star: (
@@ -70,15 +81,17 @@ const paths: Record<GlyphName, React.ReactNode> = {
   phone: (
     <path d="M7.6 3.3c.7 0 1.3.4 1.6 1l1.3 3a1.8 1.8 0 0 1-.45 2.05l-1.1 1a12.4 12.4 0 0 0 4.7 4.7l1-1.1a1.8 1.8 0 0 1 2.05-.45l3 1.3c.6.3 1 .9 1 1.6v2.3a2 2 0 0 1-2.2 2A17.6 17.6 0 0 1 3.5 5.5a2 2 0 0 1 2-2.2Z" />
   ),
-};
+});
 
-export const Glyph: React.FC<{name: GlyphName; size: number; color: string}> = ({
-  name,
-  size,
-  color,
-}) => (
+export const Glyph: React.FC<{
+  name: GlyphName;
+  size: number;
+  color: string;
+  /** The surface the glyph is drawn on, so its counters read as holes in it. */
+  counter?: string;
+}> = ({name, size, color, counter = '#fff'}) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-    {paths[name]}
+    {paths(counter)[name]}
   </svg>
 );
 
