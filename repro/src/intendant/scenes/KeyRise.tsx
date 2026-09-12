@@ -38,28 +38,25 @@ export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
       <Ink glow={0.5} />
+      {/*
+        One flat silhouette and nothing else.
+        The key used to carry a gradient, a 26 px drop shadow and a thin ring
+        around the bow. Three effects doing the work a single shape should do —
+        and the charter is built from flat fields, so none of them belonged.
+      */}
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute'}}>
-        <defs>
-          <linearGradient id="keyGrad" x1="0" y1="0" x2="0.35" y2="1">
-            <stop offset="0%" stopColor={C.blue350} />
-            <stop offset="100%" stopColor={C.blue600} />
-          </linearGradient>
-          <filter id="keyShadow" x="-40%" y="-40%" width="180%" height="180%">
-            <feDropShadow dx="0" dy="26" stdDeviation="26" floodColor="#170F0C" floodOpacity="0.5" />
-          </filter>
-        </defs>
-
-        <g transform={`translate(${cx} ${top}) scale(${s})`} filter="url(#keyShadow)">
-          {/* a thin ring echoing the diamond mark's construction */}
-          <circle r={150} fill="none" stroke={C.blue600} strokeOpacity={0.28} strokeWidth={2} />
-          {/* bow */}
-          <circle r={116} fill="url(#keyGrad)" />
-          <circle r={44} fill={C.paperDark} />
+        <g transform={`translate(${cx} ${top}) scale(${s})`} fill={C.blue600}>
+          {/* bow, with the hole cut out rather than painted over */}
+          <path
+            d="M0 -116 A116 116 0 1 1 0 116 A116 116 0 1 1 0 -116 Z
+               M0 -44 A44 44 0 1 0 0 44 A44 44 0 1 0 0 -44 Z"
+            fillRule="evenodd"
+          />
           {/* shaft */}
-          <rect x={-20} y={104} width={40} height={430} rx={12} fill="url(#keyGrad)" />
+          <rect x={-20} y={104} width={40} height={430} rx={12} />
           {/* wards */}
-          <rect x={14} y={330} width={92} height={38} rx={11} fill="url(#keyGrad)" />
-          <rect x={14} y={412} width={64} height={38} rx={11} fill="url(#keyGrad)" />
+          <rect x={14} y={330} width={92} height={38} rx={11} />
+          <rect x={14} y={412} width={64} height={38} rx={11} />
         </g>
       </svg>
 

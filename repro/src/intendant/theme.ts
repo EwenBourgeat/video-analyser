@@ -63,6 +63,18 @@ export const C = {
   blue050: '#FCEDE8',
   blueWash: '#FDF5F2',
 
+  /**
+   * The charter's own fields, used as themselves rather than derived.
+   * `cream` and `sand` are the client's two neutrals; `deep` is the true
+   * burgundy of the charter, distinct from `paperDark` — that one was
+   * deliberately desaturated to hsl(16, 26 %, 14 %) so it could carry whole
+   * frames without turning aggressive, which is exactly what a large ground
+   * needs and exactly what a small solid surface does not.
+   */
+  cream: '#EDE5DE',
+  sand: '#E4CAB4',
+  deep: '#400106',
+
   // the validation green asked for on the distribution beat
   green: '#16A34A',
   greenSoft: '#22C55E',

@@ -60,7 +60,51 @@ export const Kinetic: React.FC<{
   const revealable = toks.filter((t) => !t.space).length;
   const head = revealable * outCubic(prog(frame, from, to));
 
+  /**
+   * Runs of consecutive non-space tokens — i.e. words.
+   *
+   * Every letter is its own `inline-block`, and adjacent inline-blocks are break
+   * opportunities: given a width to wrap in, the browser was free to break
+   * BETWEEN TWO LETTERS. That is what split "rien" across two lines with the "n"
+   * left alone underneath. Making the spaces `pre-wrap` had opened a break
+   * opportunity at the spaces but never closed the ones inside the words.
+   *
+   * Grouping each word in a `nowrap` wrapper leaves the spaces as the only place
+   * the line can break, which is what a line of type is supposed to do.
+   */
+  const groups: Tok[][] = [];
+  for (const tok of toks) {
+    const last = groups[groups.length - 1];
+    if (tok.space || !last || last[0].space) groups.push([tok]);
+    else last.push(tok);
+  }
+
   let seen = 0;
+  const letter = (tok: Tok, i: number) => {
+    const idx = seen++;
+    const e = softOut(Math.max(0, Math.min(1, head - idx)));
+    if (e <= 0) return null;
+    return (
+      <span
+        key={i}
+        style={{
+          display: 'inline-block',
+          whiteSpace: 'pre',
+          color: tok.accent ? accent : ink,
+          opacity: e,
+          // a gentle rise and a barely-there scale: the old 1.42 pop read
+          // as the letters being thrown at the frame
+          transform: `translateY(${(1 - e) * 0.16 * fontSize}px) scale(${
+            1 + (1 - e) * 0.06
+          })`,
+          transformOrigin: '50% 70%',
+          filter: `blur(${(1 - e) * 5}px)`,
+        }}
+      >
+        {tok.text}
+      </span>
+    );
+  };
   return (
     <div
       style={{
@@ -76,44 +120,23 @@ export const Kinetic: React.FC<{
         ...style,
       }}
     >
-      {toks.map((tok, i) => {
-        if (tok.space) {
-          return (
-            /*
-              `pre` keeps the space from collapsing but also forbids breaking at
-              it — so when the line is allowed to wrap, the spaces have to be
-              `pre-wrap`, which preserves them AND leaves the break opportunity.
-              Without this the text simply overflows the width it was given.
-            */
-            <span key={i} style={{whiteSpace: maxWidth ? 'pre-wrap' : 'pre'}}>
-              {tok.text}
-            </span>
-          );
-        }
-        const idx = seen++;
-        const e = softOut(Math.max(0, Math.min(1, head - idx)));
-        if (e <= 0) return null;
-        return (
-          <span
-            key={i}
-            style={{
-              display: 'inline-block',
-              whiteSpace: 'pre',
-              color: tok.accent ? accent : ink,
-              opacity: e,
-              // a gentle rise and a barely-there scale: the old 1.42 pop read
-              // as the letters being thrown at the frame
-              transform: `translateY(${(1 - e) * 0.16 * fontSize}px) scale(${
-                1 + (1 - e) * 0.06
-              })`,
-              transformOrigin: '50% 70%',
-              filter: `blur(${(1 - e) * 5}px)`,
-            }}
-          >
-            {tok.text}
+      {groups.map((g, gi) =>
+        g[0].space ? (
+          /*
+            `pre` keeps the space from collapsing but also forbids breaking at
+            it — so when the line is allowed to wrap, the spaces have to be
+            `pre-wrap`, which preserves them AND leaves the break opportunity.
+            Without this the text simply overflows the width it was given.
+          */
+          <span key={gi} style={{whiteSpace: maxWidth ? 'pre-wrap' : 'pre'}}>
+            {g[0].text}
           </span>
-        );
-      })}
+        ) : (
+          <span key={gi} style={{whiteSpace: 'nowrap'}}>
+            {g.map((tok, i) => letter(tok, i))}
+          </span>
+        )
+      )}
     </div>
   );
 };

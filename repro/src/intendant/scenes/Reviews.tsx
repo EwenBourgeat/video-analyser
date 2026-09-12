@@ -29,8 +29,8 @@ import {EASE} from '../../bezier';
  * speed is identical either side of it, so there is nothing to see and nothing
  * to match.
  *
- * Once settled, 8 px/frame puts one cycle of the twelve cards at 15.6 s, still
- * inside the 15-25 s band that reads as neither anxious nor broken.
+ * Once settled, 6.8 px/frame puts one cycle of the twelve cards at 20.2 s —
+ * a notch slower than it was, still inside the 15-25 s band.
  */
 
 const FROM = T.reviews.from;
@@ -70,7 +70,7 @@ const geom = (tall: boolean) => {
  * whip crosses it in 44 and the frame is full 0.77 s in.
  */
 const V_IN = 44;
-const V_OUT = 8;
+const V_OUT = 6.8;
 const SETTLE = 110;
 
 /**

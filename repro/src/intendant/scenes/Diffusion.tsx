@@ -286,21 +286,7 @@ export const Diffusion: React.FC<{frame: number}> = ({frame}) => {
               );
             })}
           </div>
-          <div
-            style={{
-              position: 'absolute',
-              left: rowsX + ROW_X,
-              top: H / 2 + (tall ? 258 : 330),
-              fontFamily: SANS,
-              fontWeight: W_MED,
-              fontSize: tall ? 24 : 32,
-              width: tall ? ROW_W : undefined,
-              color: C.muted,
-              opacity: EASE.entrance(prog(frame, FROM + 100, FROM + 136)) * rowsOut,
-            }}
-          >
-            Une annonce, quatre plateformes, un seul interlocuteur.
-          </div>
+
         </>
       ) : null}
 

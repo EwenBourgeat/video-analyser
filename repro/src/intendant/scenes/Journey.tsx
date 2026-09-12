@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {C, SANS, W_MED, W_BOLD} from '../theme';
-import {useStage, frontOf, cruiseBase} from '../format';
+import {useStage, frontOf} from '../format';
 import {Ink} from '../components/Grounds';
 import {Glyph, GlyphName} from '../components/Glyphs';
 import {prog} from '../../ease';
@@ -52,10 +52,27 @@ const TILE = 190;   // measured on the reference: ~180-190 px of a 1920 frame
 /** Pan rate at cruise, master px per frame at 60 fps. */
 const RATE = 12.3;
 
-/** When the thread reaches station i. Everything else is offset from this. */
-const ARRIVE_0 = FROM + 24;
-const ARRIVE_STEP = SPACING / RATE;          // 78 frames
-const arriveOf = (i: number) => ARRIVE_0 + i * ARRIVE_STEP;
+/**
+ * The beat OPENS on station 01 rather than travelling towards it.
+ *
+ * The thread used to begin 1344 px to the left of the first station and the
+ * camera started further left again, so the picture opened on empty ground with
+ * station 01 hard against the right edge. Now the thread is born AT station 01
+ * (see PATH_X0) and the camera simply holds there while it reveals, then leaves.
+ *
+ * Because the thread starts at station 01 there is no "thread arriving" for it —
+ * only stations 02 and 03 are gated by the front column, and their times are
+ * SOLVED from the camera rather than assumed, so they cannot drift apart.
+ */
+const HOLD = 40;
+const RAMP_IN = 20;
+const RAMP_DIST = 0.5 * RATE * RAMP_IN;
+
+const arriveOf = (i: number, w: number, tall: boolean) => {
+  if (i === 0) return FROM + 20 + ICON_LEAD;
+  const need = X0 + i * SPACING - frontOf(w, tall);
+  return FROM + HOLD + RAMP_IN + (need - RAMP_DIST) / RATE;
+};
 
 /** Measured leads and lags, in frames at 60 fps. */
 const ICON_LEAD = 18;
@@ -76,15 +93,13 @@ const LABEL_LAG = 4;
 const labelTiming = (tall: boolean) =>
   tall ? {lag: -16, dur: 18, step: 4} : {lag: LABEL_LAG, dur: 26, step: 6};
 
-/** Velocity ramps, kept clear of every station so arrivals stay exact. */
-const RAMP_IN = ARRIVE_0 - FROM;
 /**
  * The camera no longer stops at the end of the stations and dives away. It keeps
  * running right, the stations leave frame, and it comes to rest in the empty
  * ground where the reviews then build. The braking is placed late enough that
  * station 05 has finished leaving before it starts.
  */
-const RUSH_FROM = 914;
+const RUSH_FROM = 895;
 const RUSH = 40;
 /**
  * The camera does not slow at the end of the travelling — it SPEEDS UP, from
@@ -110,18 +125,25 @@ const RUSH = 40;
 const RUSH_TO = 44;
 
 /**
+ * When the ground starts going back to dark. Solved, not chosen: station 03
+ * stands at world x 2620 and its label reaches 190 px to its left, so the last
+ * ink leaves the frame when camX passes 2810, which the rush reaches at f = 928.
+ */
+const WHITE_OUT = 930;
+
+/**
  * Camera x. Constant through the stations, with velocity ramped from and back
  * to zero outside them — so the pan never starts or stops on a step, and the
  * arrival frames stay exactly where the station timings expect them.
  */
 export const camXAt = (f: number, w: number, tall: boolean) => {
-  const FRONT = frontOf(w, tall);
-  const cruise = (g: number) => cruiseBase(w, tall) + (g - ARRIVE_0) * RATE;
-  if (f < ARRIVE_0) {
-    // v(u) = RATE * u, so displacement is quadratic and meets cruise at u = 1
-    const u = Math.max(0, (f - FROM) / RAMP_IN);
-    return cruise(ARRIVE_0) - (RATE * RAMP_IN * (1 - u * u)) / 2;
+  // the camera is still while station 01 reveals, then eases away
+  if (f <= FROM + HOLD) return 0;
+  if (f < FROM + HOLD + RAMP_IN) {
+    const u = (f - FROM - HOLD) / RAMP_IN;
+    return RAMP_DIST * u * u;
   }
+  const cruise = (g: number) => RAMP_DIST + (g - FROM - HOLD - RAMP_IN) * RATE;
   if (f <= RUSH_FROM) return cruise(f);
   /**
    * Smoothstep from RATE to RUSH_TO:
@@ -142,14 +164,16 @@ export const camXAt = (f: number, w: number, tall: boolean) => {
 
 const sineY = (x: number) => MID - AMP * Math.cos((Math.PI * (x - X0)) / SPACING);
 
-const PATH_X0 = X0 - SPACING * 1.4;
+/** The thread is born at station 01: nothing is drawn to its left. */
+const PATH_X0 = X0;
 /**
- * The thread now ENDS, a little past the last station, instead of running on to
- * x = 5884. It used to be drawn up to `camX + FRONT`, which is a fixed column of
- * the frame — so the thread was on screen at every camera position and the frame
- * could never empty. The beat's whole hand-over depends on the frame emptying.
+ * 500 px past the last station, not 2420.
+ *
+ * With five stations the thread ran to 5040 and the last one stood at 4540. Cut
+ * to three, the last station moved to 2620 but the thread kept its old end, so
+ * it trailed off for nearly half the beat — the tail that was called too long.
  */
-const PATH_END = 5040;
+const PATH_END = X0 + 2 * SPACING + 500;
 const PATH_X1 = PATH_END;
 const PATH_D = (() => {
   let d = '';
@@ -185,6 +209,9 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
   const camY = 0;
   /** World x the thread has been drawn to, and never past its own end. */
   const frontX = Math.min(camX + FRONT, PATH_END);
+  const whiteness =
+    EASE.entrance(prog(frame, FROM + 2, FROM + 34)) *
+    (1 - EASE.entrance(prog(frame, WHITE_OUT, WHITE_OUT + 32)));
 
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
@@ -195,6 +222,24 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
         made the background brightness jump at that exact frame.
       */}
       <Ink glow={0.9 - 0.4 * prog(frame, RUSH_FROM, TO)} />
+
+      {/*
+        The beat plays on WHITE, but it does not CUT to white.
+
+        Both of its edges are match cuts onto dark ground — that was measured and
+        fixed in earlier passes, and a scene that simply painted itself white
+        would put a 60-point luminance step at each one. So the white is raised
+        and lowered inside the scene: the dark `Ink` above is left running
+        underneath, and this sheet fades up over half a second once the cut has
+        landed, then back down once the last station has left the frame.
+
+        WHITE_OUT starts at 930 rather than at the rush, because station 03's
+        label is still in frame until 928 and it is burgundy on white — darkening
+        under it would have pushed it through its own background.
+      */}
+      <AbsoluteFill
+        style={{background: '#FFFFFF', opacity: whiteness, pointerEvents: 'none'}}
+      />
 
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute'}}>
         <defs>
@@ -213,17 +258,18 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
             x2={PATH_X1}
             y2="0"
           >
-            <stop offset="0%" stopColor={C.blue350} stopOpacity="0" />
-            <stop offset="7%" stopColor={C.blue350} stopOpacity="0.85" />
-            <stop offset="50%" stopColor={C.blue350} stopOpacity="1" />
-            <stop offset="93%" stopColor={C.blue350} stopOpacity="0.85" />
-            <stop offset="100%" stopColor={C.blue350} stopOpacity="0" />
+            <stop offset="0%" stopColor={C.blue600} stopOpacity="0" />
+            <stop offset="7%" stopColor={C.blue600} stopOpacity="0.85" />
+            <stop offset="50%" stopColor={C.blue600} stopOpacity="1" />
+            <stop offset="93%" stopColor={C.blue600} stopOpacity="0.85" />
+            <stop offset="100%" stopColor={C.blue600} stopOpacity="0" />
           </linearGradient>
         </defs>
         <g transform={`translate(${-camX} ${-camY})`}>
           {STEPS.map((s, i) => {
             const x = X0 + i * SPACING;
-            const g = EASE.entrance(prog(frame, arriveOf(i) - GHOST_LEAD, arriveOf(i) + 10));
+            const a = arriveOf(i, W, tall);
+            const g = EASE.entrance(prog(frame, a - GHOST_LEAD, a + 10));
             return (
               <text
                 key={s.n}
@@ -240,8 +286,8 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
                 fontFamily={SANS}
                 fontWeight={700}
                 fontSize={tall ? 200 : 300}
-                fill={C.inkDark}
-                fillOpacity={0.10 * g}
+                fill={C.blue600}
+                fillOpacity={0.14 * g}
                 textAnchor="middle"
               >
                 {s.n}
@@ -260,7 +306,7 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
         const sx = x - camX;
         const sy = sineY(x) - camY;
         if (sx < -600 || sx > W + 600) return null;
-        const arrive = arriveOf(i);
+        const arrive = arriveOf(i, W, tall);
         // the tile is up and glowing well before the thread gets to it
         const e = EASE.entrance(prog(frame, arrive - ICON_LEAD, arrive - ICON_LEAD + 20));
         return (
@@ -273,18 +319,28 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
                 width: TILE,
                 height: TILE,
                 borderRadius: 48,
-                background: C.paper,
+                background: C.deep,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: `0 0 ${64 * e}px ${16 * e}px rgba(236,155,137,0.38), 0 16px 38px rgba(0,0,0,0.45)`,
+                /*
+                  A shadow, not a halo. The glow made sense on dark ground and
+                  makes none on white — and it was the surbrillance the brief
+                  asked to remove. What is left reads as the tile sitting on the
+                  page rather than emitting from it.
+                */
+                boxShadow: `0 ${14 * e}px ${34 * e}px rgba(64,1,6,0.16)`,
                 opacity: e,
                 transform: `scale(${0.5 + 0.5 * e})`,
               }}
             >
-              {/* the mark's own dark ink, not the brand colour: at full saturation the
-                  symbol fought the tile it sits in and read as an alert */}
-              <Glyph name={s.glyph} size={TILE * 0.52} color={C.inkSoft} />
+              {/*
+                Cream on burgundy: 11.4:1, far past the 3:1 a UI element needs.
+                The symbol used to be dark ink on a pale tile, which inverted
+                once the ground turned white — the tile then had less contrast
+                against the page than the symbol had against the tile.
+              */}
+              <Glyph name={s.glyph} size={TILE * 0.52} color={C.cream} />
             </div>
             <div
               style={{
@@ -305,7 +361,7 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
                 fontSize: 54,
                 lineHeight: 1.16,
                 letterSpacing: '-0.028em',
-                color: C.inkDark,
+                color: C.deep,
                 whiteSpace: 'pre',
               }}
             >

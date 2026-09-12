@@ -58,8 +58,6 @@ export const Browser: React.FC<{frame: number}> = ({frame}) => {
   const k = pageW / SETTLED;
   const scale = pageW / W;
 
-  const pauseP = prog(frame, 396, 424);
-  const pauseR = 150 * k * (0.74 + 0.26 * EASE.pop(pauseP));
 
   return (
     <AbsoluteFill>
@@ -106,38 +104,7 @@ export const Browser: React.FC<{frame: number}> = ({frame}) => {
         </div>
       </div>
 
-      {pauseP > 0 ? (
-        <div
-          style={{
-            position: 'absolute',
-            left: W / 2,
-            top: top + pageH * 0.5,
-            transform: 'translate(-50%,-50%)',
-            width: pauseR * 2,
-            height: pauseR * 2,
-            borderRadius: '50%',
-            background: 'rgba(30,30,32,0.5)',
-            backdropFilter: 'blur(2px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: pauseR * 0.24,
-            opacity: pauseP,
-          }}
-        >
-          {[0, 1].map((i) => (
-            <div
-              key={i}
-              style={{
-                width: pauseR * 0.19,
-                height: pauseR * 0.76,
-                borderRadius: pauseR * 0.09,
-                background: C.paper,
-              }}
-            />
-          ))}
-        </div>
-      ) : null}
+
     </AbsoluteFill>
   );
 };

@@ -111,30 +111,16 @@ export const Intendant: React.FC = () => {
               marginTop: -MORPH_R(frame),
               borderRadius: '50%',
               background: C.blue600,
+              /*
+                The disc used to shrink to badge size and hold, with a white tick
+                drawn inside it — so the transition ended on a generic "task
+                completed" mark. It now hands over instead: the disc dissolves as
+                it finishes contracting and the brand's diamond, which `Simple`
+                fades in over exactly this window, is what it leaves behind.
+              */
+              opacity: 1 - prog(frame, 1996, 2010),
             }}
           />
-          {MORPH_R(frame) < 60 ? (
-            <div
-              style={{
-                position: 'absolute',
-                left: badge.x,
-                top: badge.y,
-                transform: 'translate(-50%,-50%)',
-                opacity: prog(frame, 1992, 2004),
-              }}
-            >
-              <svg width={64} height={64} viewBox="0 0 40 40">
-                <path
-                  d="M12 20.5 L17.5 26 L28 14.5"
-                  fill="none"
-                  stroke={C.paper}
-                  strokeWidth="4.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-          ) : null}
         </AbsoluteFill>
       ) : null}
       <In from={T.endcard.from} to={T.endcard.to} frame={frame}>
