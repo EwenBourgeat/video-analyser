@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SERIF, T} from '../theme';
+import {C, SANS, W_MED, T} from '../theme';
 import {useStage} from '../format';
 import {Paper} from '../components/Grounds';
 import {Mark} from '../components/Brand';
@@ -67,10 +67,10 @@ export const Simple: React.FC<{frame: number}> = ({frame}) => {
 
   const type: React.CSSProperties = {
     position: 'absolute',
-    fontFamily: SERIF,
-    fontWeight: 400,
+    fontFamily: SANS,
+    fontWeight: W_MED,
     fontSize: 98,
-    letterSpacing: '-0.03em',
+    letterSpacing: '-0.012em',
     whiteSpace: 'nowrap',
   };
 

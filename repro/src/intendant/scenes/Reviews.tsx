@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
-import {C, SANS, SERIF, W_MED, W_BOLD, T} from '../theme';
+import {C, SANS, W_MED, W_BOLD, T} from '../theme';
 import {useStage} from '../format';
 import {camXAt} from './Journey';
 import {Ink} from '../components/Grounds';
@@ -289,10 +289,10 @@ export const Reviews: React.FC<{frame: number}> = ({frame}) => {
           top: tall ? 328 : 292,
           width: W,
           textAlign: 'center',
-          fontFamily: SERIF,
-          fontWeight: 400,
+          fontFamily: SANS,
+          fontWeight: W_MED,
           fontSize: tall ? 66 : 80,
-          letterSpacing: '-0.03em',
+          letterSpacing: '-0.012em',
           color: C.inkDark,
           opacity: title * out,
           transform: `translateY(${(1 - title) * 22}px)`,

@@ -58,6 +58,17 @@ export const Exposure: React.FC<{
   exitTo: number;
   fontSize: number;
   font: string;
+  /**
+   * Futura needs a weight and a tracking that a didone did not.
+   * This component was written when every statement in the film was set in
+   * Didot at 400: one weight, one tracking, no reason to expose either. Now the
+   * statements are geometric sans, where 400 is a synthesised smear (only Medium
+   * and Bold are installed) and -0.028em closes the counters of a face built on
+   * circles. Both are therefore parameters, with the didone values as defaults
+   * so nothing that still passes a serif changes.
+   */
+  weight?: number;
+  tracking?: string;
   /** Which row carries the accent. Defaults to the last. */
   accentRow?: number;
   /**
@@ -84,6 +95,8 @@ export const Exposure: React.FC<{
   exitTo,
   fontSize,
   font,
+  weight = 400,
+  tracking = '-0.028em',
   accentRow,
   ground = 'dark',
   soft = 20,
@@ -108,10 +121,10 @@ export const Exposure: React.FC<{
         alignItems: 'center',
         justifyContent: 'center',
         fontFamily: font,
-        fontWeight: 400,
+        fontWeight: weight,
         fontSize,
         lineHeight: 1.2,
-        letterSpacing: '-0.028em',
+        letterSpacing: tracking,
       }}
     >
       {rows.map((row, ri) => {

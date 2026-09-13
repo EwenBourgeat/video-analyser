@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {SERIF, T} from '../theme';
+import {SANS, W_MED, T} from '../theme';
 import {Ink, Paper} from '../components/Grounds';
 import {Exposure} from '../components/Exposure';
 import {prog} from '../../ease';
@@ -95,7 +95,9 @@ export const KeyRise: React.FC<{frame: number}> = ({frame}) => {
         exitFrom={EXIT_FROM}
         exitTo={EXIT_TO}
         fontSize={118}
-        font={SERIF}
+        font={SANS}
+        weight={W_MED}
+        tracking="-0.012em"
         ground="light"
         soft={SOFT}
       />

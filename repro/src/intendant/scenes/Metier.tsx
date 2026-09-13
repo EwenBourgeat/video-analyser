@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {SERIF, T} from '../theme';
+import {SANS, W_MED, T} from '../theme';
 import {useStage} from '../format';
 import {Ink} from '../components/Grounds';
 import {Exposure} from '../components/Exposure';
@@ -46,7 +46,9 @@ export const Metier: React.FC<{frame: number}> = ({frame}) => {
         exitFrom={TO - 30}
         exitTo={TO}
         fontSize={tall ? 80 : 72}
-        font={SERIF}
+        font={SANS}
+        weight={W_MED}
+        tracking="-0.012em"
         ground="dark"
       />
     </AbsoluteFill>

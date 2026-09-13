@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SANS, SERIF, W_BOLD, T} from '../theme';
+import {C, SANS, W_MED, W_BOLD, T} from '../theme';
 import {useStage} from '../format';
 import {Ink} from '../components/Grounds';
 import {Glyph, GlyphName} from '../components/Glyphs';
@@ -261,7 +261,9 @@ export const Journey: React.FC<{frame: number}> = ({frame}) => {
           exitFrom={RUSH_FROM}
           exitTo={RUSH_FROM + 20}
           fontSize={S.line}
-          font={SERIF}
+          font={SANS}
+          weight={W_MED}
+          tracking="-0.012em"
           ground="light"
           accentRow={0}
           soft={10}

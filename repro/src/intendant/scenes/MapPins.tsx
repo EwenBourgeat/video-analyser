@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
-import {C, SERIF, T} from '../../intendant/theme';
+import {C, SANS, W_MED, T} from '../../intendant/theme';
 import {Exposure} from '../components/Exposure';
 import {useStage, clockGeom} from '../format';
 import {Paper} from '../components/Grounds';
@@ -347,7 +347,9 @@ export const MapPins: React.FC<{frame: number}> = ({frame}) => {
           exitFrom={T.map.to - 60}
           exitTo={T.map.to - 32}
           fontSize={tall ? 74 : 64}
-          font={SERIF}
+          font={SANS}
+          weight={W_MED}
+          tracking="-0.012em"
           ground="light"
           soft={11}
         />
