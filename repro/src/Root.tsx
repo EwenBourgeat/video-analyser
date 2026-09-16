@@ -10,6 +10,12 @@ import {
   TOTAL_FRAMES as ITOTAL,
 } from './intendant/theme';
 import {PW, PH} from './intendant/format';
+import {Intendant2} from './intendant2/Video';
+import {
+  W as I2W,
+  H as I2H,
+  TOTAL_FRAMES as I2TOTAL,
+} from './intendant2/theme';
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -41,6 +47,18 @@ export const RemotionRoot: React.FC = () => (
       fps={IFPS}
       width={PW}
       height={PH}
+    />
+    {/*
+      La seconde publicité. 4:5 uniquement : elle est née pour le fil, là où la
+      première portait un 16:9 par héritage.
+    */}
+    <Composition
+      id="Intendant2"
+      component={Intendant2}
+      durationInFrames={I2TOTAL}
+      fps={IFPS}
+      width={I2W}
+      height={I2H}
     />
   </>
 );
