@@ -142,14 +142,14 @@ export const T = {
   clock: {from: 180, to: 492},
   browser: {from: 330, to: 492},
   metier: {from: 496, to: 714},
-  journey: {from: 714, to: 994},
-  reviews: {from: 994, to: 1354},
-  key: {from: 1354, to: 1474},
-  logo: {from: 1474, to: 1546},
-  diffusion: {from: 1546, to: 1856},
-  calendar: {from: 1856, to: 2086},
-  simple: {from: 2086, to: 2246},
-  endcard: {from: 2246, to: 2492},
+  journey: {from: 714, to: 964},
+  reviews: {from: 964, to: 1324},
+  key: {from: 1324, to: 1444},
+  logo: {from: 1444, to: 1516},
+  diffusion: {from: 1516, to: 1826},
+  calendar: {from: 1826, to: 2056},
+  simple: {from: 2056, to: 2216},
+  endcard: {from: 2216, to: 2462},
 } as const;
 
-export const TOTAL_FRAMES = 2492; // 41,5 s
+export const TOTAL_FRAMES = 2462; // 41,0 s

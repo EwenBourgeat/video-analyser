@@ -40,7 +40,12 @@ const FROM = T.calendar.from;
 const TO = T.calendar.to;
 
 /** The wide shot holds until here, then the camera starts. */
-const ZOOM_FROM = FROM + 100;
+/**
+ * The push starts 18 frames earlier than it did — 0,3 s less of holding on a
+ * static list before anything happens. The click stays where it is, so the move
+ * simply has more room rather than being rushed.
+ */
+const ZOOM_FROM = FROM + 82;
 const CLICK = FROM + 170;
 
 type Row = {

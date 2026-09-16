@@ -91,7 +91,7 @@ const OFFSTAGE = 1.05;
  * rows snap in: the contrast between a hard arrival and a soft resolve is what
  * marks it as the conclusion rather than as a fourth item.
  */
-const LINE_FROM = ROW_IN + 2 * ROW_STEP + ROW_DUR + 8;
+const LINE_FROM = ROW_IN + 2 * ROW_STEP + ROW_DUR + 4;
 
 export const Journey: React.FC<{frame: number}> = ({frame}) => {
   const {w: W, h: H, tall} = useStage();
